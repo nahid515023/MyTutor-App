@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+model User {
+  id           String  @id @unique @default(uuid())
+  name         String
+  email        String
+  password     String
+  bio          String?
+  skills       String?
+  phone        String?
+  grade        String?
+  education    String?
+  dob          String?
+  gender       String?
+  profileImage String?
+  coverImage   String?
+  location     String?
+  status       String?            @default("active") // active, blocked
+
+  verified          Boolean             @default(false)
+  about             String?
+  role              Role                @default(STUDENT)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  Token             Token[]
+  emailVerification emailVerification[]
+  RestPassword      RestPassword[]
+  Post              Post[]
+  TutorRequest      TutorRequest[]
+  ConnectedAccounts ConnectedAccount[]  @relation("ConnectedAccountUser")
+  ConnectedAccount  ConnectedAccount[]
+  RatingBy          Rating[]            @relation("ratingBy")
+  RatingTo          Rating[]            @relation("ratingTo")
+  MeetingTeacher    Meeting[]           @relation("relation teacher")
+  MeetingUser       Meeting[]           @relation("relation user")
+  PaymentUser       Payment[]           @relation("PaymentUser")
+  PaymentTeacher    Payment[]           @relation("PaymentTeacher")
+  notifications     Notification[]
+}
+
+model Rating {
+  id           String   @id @unique @default(uuid())
+  postId       String
+  ratingBy     String
+  ratingTo     String
+  rating       Int
+  review       String?
+  meetingId    String?
+  ratedAt      DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  ratingByUser User     @relation("ratingBy", fields: [ratingBy], references: [id], onDelete: Cascade)
+  ratingToUser User     @relation("ratingTo", fields: [ratingTo], references: [id], onDelete: Cascade)
+  Post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  Meeting      Meeting? @relation(fields: [meetingId], references: [id])
+}
+
+model RestPassword {
+  id        String   @id @unique @default(uuid())
+  userId    String
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model emailVerification {
+  id        String   @id @unique @default(uuid())
+  userId    String
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Token {
+  id        String   @id @unique @default(uuid())
+  userId    String
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id             String         @id @unique @default(uuid())
+  medium         String
+  Class          String
+  subject        String
+  fees           String
+  description    String
+  preferableTime String?
+  preferableDate String?
+  booked         Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  userId         String
+  User           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  TutorRequest   TutorRequest[]
+  Rating         Rating[]
+  Meeting        Meeting[]
+  Payment        Payment[]
+}
+
+model TutorRequest {
+  id        String   @id @unique @default(uuid())
+  userId    String
+  postId    String
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model ConnectedAccount {
+  id            String   @id @unique @default(uuid())
+  userId        String
+  contactUserId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ContactUser   User     @relation("ConnectedAccountUser", fields: [contactUserId], references: [id], onDelete: Cascade)
+  Chat          Chat[]
+}
+
+model Chat {
+  id          String           @id @unique @default(uuid())
+  connectedId String
+  senderId    String
+  receiverId  String
+  message     String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  Connected   ConnectedAccount @relation(fields: [connectedId], references: [id], onDelete: Cascade)
+}
+
+model Meeting {
+  id        String   @id @unique @default(uuid())
+  userId    String
+  teacherId String
+  postId    String
+  title     String   @default("Today Class")
+  start     DateTime
+  end       DateTime
+  link      String
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation("relation user", fields: [userId], references: [id], onDelete: Cascade)
+  Teacher   User     @relation("relation teacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  Rating    Rating[]
+}
+
+model Payment {
+  id            String   @id @unique @default(uuid())
+  userId        String
+  postId        String
+  teacherId     String
+  transactionId String
+  paymentMethod String
+  amount        Int
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  User          User     @relation("PaymentUser", fields: [userId], references: [id], onDelete: Cascade)
+  Post          Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  Teacher       User     @relation("PaymentTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id          String   @id @unique @default(uuid())
+  userId      String
+  type        String
+  message     String
+  isRead      Boolean  @default(false)
+  link        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
