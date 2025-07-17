@@ -1,8 +1,10 @@
 import { Chat } from '@/types/chat'
+import { APP_CONFIG, API_CONFIG } from '@/config'
 
 export const getProfileImageUrl = (profileImage: string | undefined) => {
-  if (!profileImage) return '/default-avatar.png'
-  return `${process.env.NEXT_PUBLIC_API_URL_IMAGE || ''}/${profileImage}`
+  if (!profileImage) return APP_CONFIG.DEFAULT_AVATAR
+  if (profileImage.startsWith('http')) return profileImage
+  return `${API_CONFIG.IMAGE_BASE_URL}${profileImage}`
 }
 
 export const groupMessagesByDate = (messages: Chat[]) => {

@@ -1,12 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html {
-    font-family: theme('fontFamily.sans');
+    font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-size: 16px; /* Base font size */
+  }
+
+  body {
+    font-size: 1rem; /* 16px - Body text */
+    line-height: 1.6;
+  }
+
+  h1 {
+    font-size: 2.25rem; /* 36px */
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 1.75rem; /* 28px */
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 1.375rem; /* 22px */
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  h4 {
+    font-size: 1.125rem; /* 18px */
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  h5 {
+    font-size: 1rem; /* 16px */
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  h6 {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .text-small {
+    font-size: 0.875rem; /* 14px - Small text */
+  }
+
+  button {
+    font-size: 1rem; /* 16px - Buttons */
+    font-weight: 500;
+  }
+
+  nav, .nav {
+    font-size: 1rem; /* 16px - Navigation */
+    font-weight: 500;
+  }
+
+  .nav-large {
+    font-size: 1.125rem; /* 18px - Larger navigation */
   }
 
   :root {
@@ -33,25 +95,25 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.5% 48%;
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 263.4 70% 50.4%;
   }
 }
 
@@ -61,6 +123,53 @@
   }
   .text-foreground {
     color: var(--foreground);
+  }
+  
+  /* Custom font size utilities */
+  .text-body {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
+  .text-small {
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  
+  .text-h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  
+  .text-h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  .text-h3 {
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  
+  .text-button {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  
+  .text-nav {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  
+  .text-nav-lg {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.5;
   }
 }
 
@@ -114,5 +223,130 @@
   .backdrop-blur-lg {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+@layer utilities {
+  .bg-background {
+    background-color: var(--background);
+  }
+  .text-foreground {
+    color: var(--foreground);
+  }
+  
+  /* Dark mode specific utilities */
+  .dark .text-white {
+    color: hsl(210 20% 98%);
+  }
+  
+  .dark .text-gray-100 {
+    color: hsl(220 14.3% 95.9%);
+  }
+  
+  .dark .text-gray-200 {
+    color: hsl(220 13% 91%);
+  }
+  
+  .dark .text-gray-300 {
+    color: hsl(216 12.2% 83.9%);
+  }
+  
+  .dark .text-gray-400 {
+    color: hsl(218 10.6% 64.9%);
+  }
+  
+  .dark .text-gray-500 {
+    color: hsl(220 8.9% 46.1%);
+  }
+  
+  .dark .bg-gray-800 {
+    background-color: hsl(217 19.1% 26.7%);
+  }
+  
+  .dark .bg-gray-900 {
+    background-color: hsl(224 71.4% 4.1%);
+  }
+  
+  .dark .bg-gray-950 {
+    background-color: hsl(224 71.4% 2.1%);
+  }
+  
+  .dark .border-gray-700 {
+    border-color: hsl(215 27.9% 16.9%);
+  }
+  
+  .dark .border-gray-800 {
+    border-color: hsl(217 19.1% 26.7%);
+  }
+  
+  /* Enhanced contrast for dark mode text */
+  .dark .text-primary {
+    color: hsl(263.4 70% 60%);
+  }
+  
+  .dark .text-secondary {
+    color: hsl(217.9 10.6% 64.9%);
+  }
+  
+  .dark .text-muted {
+    color: hsl(217.9 10.6% 64.9%);
+  }
+  
+  /* Card and surface colors for dark mode */
+  .dark .bg-card {
+    background-color: hsl(215 27.9% 16.9%);
+  }
+  
+  .dark .bg-popover {
+    background-color: hsl(215 27.9% 16.9%);
+  }
+  
+  .dark .bg-accent {
+    background-color: hsl(215 27.9% 16.9%);
+  }
+  
+  /* Input and form element styling for dark mode */
+  .dark .bg-input {
+    background-color: hsl(215 27.9% 16.9%);
+  }
+  
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background-color: hsl(215 27.9% 16.9%);
+    border-color: hsl(215 27.9% 26.9%);
+    color: hsl(210 20% 98%);
+  }
+  
+  .dark input:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    border-color: hsl(263.4 70% 50.4%);
+    box-shadow: 0 0 0 2px hsl(263.4 70% 50.4% / 0.2);
+  }
+  
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: hsl(217.9 10.6% 64.9%);
+  }
+  
+  /* Button styling for dark mode */
+  .dark .btn-primary {
+    background-color: hsl(263.4 70% 50.4%);
+    color: hsl(210 20% 98%);
+  }
+  
+  .dark .btn-primary:hover {
+    background-color: hsl(263.4 70% 45%);
+  }
+  
+  .dark .btn-secondary {
+    background-color: hsl(215 27.9% 16.9%);
+    color: hsl(210 20% 98%);
+    border-color: hsl(215 27.9% 26.9%);
+  }
+  
+  .dark .btn-secondary:hover {
+    background-color: hsl(215 27.9% 20%);
   }
 }

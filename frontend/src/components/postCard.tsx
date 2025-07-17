@@ -2,6 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Post } from '@/types/post'
+import { getProfileImageUrl } from '@/utils/getProfileImage'
 
 interface PostCardProps {
   post: Post
@@ -17,7 +18,7 @@ const PostCard = ({ post, booked, getDateInPost }: PostCardProps) => {
           <div className='relative'>
             <div className='w-16 h-16 rounded-full overflow-hidden ring-2 ring-blue-400 dark:ring-blue-500 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-700'>
               <Image
-                src={`${process.env.NEXT_PUBLIC_API_URL_IMAGE}${post.User.profileImage}`}
+                src={getProfileImageUrl(post.User.profileImage)}
                 alt={post.User.name}
                 width={64}
                 height={64}

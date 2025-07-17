@@ -7,6 +7,11 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeToggle } from './ThemeToggle'
 import { FaGraduationCap } from 'react-icons/fa'
+import { getUserData } from '@/utils/cookiesUserData'
+import { getProfileImageUrl } from '@/utils/getProfileImage'
+import { APP_CONFIG } from '@/config'
+import { API_ENDPOINTS } from '../config/index'
+import { api } from '@/_lib/api'
 
 interface User {
   id: string
@@ -23,33 +28,23 @@ export default function Nav () {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-
   useEffect(() => {
-    const checkUserCookie = () => {
-      try {
-        const userCookie = Cookies.get('user')
-        if (userCookie) {
-          const parsedUser = JSON.parse(userCookie)
-          setUser(parsedUser)
-        }
-      } catch (error) {
-        console.error('Error parsing user cookie:', error)
+    // Fetch user data from cookies
+    const fetchUserData = () => {
+      const userData = getUserData()
+      if (userData) {
+        setUser(userData)
+      } else {
+        setUser(null)
       }
     }
+    const intervalId = setInterval(fetchUserData, 1000)
 
-    // Check initially
-    checkUserCookie()
-
-    // Set up an interval to check for cookie changes
-    const intervalId = setInterval(checkUserCookie, 5000)
-
-    // Cleanup interval on unmount
     return () => clearInterval(intervalId)
   }, [])
 
-  // Add padding to body for fixed nav
   useEffect(() => {
-    document.body.style.paddingTop = '76px' // Adjust based on your nav height
+    document.body.style.paddingTop = '76px'
     return () => {
       document.body.style.paddingTop = '0'
     }
@@ -81,11 +76,9 @@ export default function Nav () {
     }
   }, [isMobileMenuOpen, isSearchOpen])
 
-  const handleLogout = (): void => {
+  const handleLogout = async (): Promise<void> => {
     try {
-      // Remove cookies
-      Cookies.remove('token')
-      Cookies.remove('user')
+      await api.get(API_ENDPOINTS.AUTH.LOGOUT)
       Cookies.remove('theme')
 
       // Reset states
@@ -97,17 +90,6 @@ export default function Nav () {
       console.error('Error during logout:', error)
     }
   }
-
-  const getProfileImage = () => {
-    if (!user || !user.profileImage) {
-      return `${process.env.NEXT_PUBLIC_DEFULT_IMAGE}`
-    }
-    return user.profileImage.startsWith('http')
-      ? user.profileImage
-      : `${process.env.NEXT_PUBLIC_API_URL_IMAGE}${user.profileImage}`
-  }
-
-  console.log('User profile image:', getProfileImage())
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -126,7 +108,7 @@ export default function Nav () {
     return (
       <nav className='fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-blue-50 via-purple-50 to-green-50 dark:from-gray-900 dark:via-slate-800 dark:to-neutral-900 text-blue-800 dark:text-blue-300 shadow-lg'>
         <div className='container max-w-screen-xl mx-auto flex items-center justify-between px-4 py-3'>
-          <div  className="flex items-center gap-2 text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600 transition-all duration-300">
+          <div className='flex items-center gap-2 text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600 transition-all duration-300'>
             <FaGraduationCap className='text-2xl text-blue-600' />
             MyTutor
           </div>
@@ -156,7 +138,7 @@ export default function Nav () {
         {/* Mobile Right Section */}
         <div className='flex items-center gap-3 lg:hidden'>
           {/* Theme Toggle Mobile */}
-          <ThemeToggle className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" />
+          <ThemeToggle className='p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg' />
 
           <button
             data-mobile-search
@@ -187,7 +169,9 @@ export default function Nav () {
             aria-label='Toggle menu'
           >
             <svg
-              className={`w-6 h-6 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-90' : ''}`}
+              className={`w-6 h-6 transition-transform duration-300 ${
+                isMobileMenuOpen ? 'rotate-90' : ''
+              }`}
               fill='none'
               stroke='currentColor'
               viewBox='0 0 24 24'
@@ -210,28 +194,23 @@ export default function Nav () {
             </svg>
           </button>
 
-          {/* Mobile Profile Link */}
           <Link
             href={`/profile/${user.id}`}
             className='flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 transform hover:scale-105 active:scale-95'
           >
             <Image
-              src={getProfileImage()}
+              src={getProfileImageUrl(user.profileImage ?? '')}
               alt='User Avatar'
               width={40}
               height={40}
               className='rounded-full w-10 h-10 object-cover object-center'
-              onError={e => {
-                const target = e.target as HTMLImageElement
-                target.src = '/default-avatar.png'
-              }}
             />
           </Link>
         </div>
 
         {/* Mobile Search Bar - Appears when search is clicked */}
         {isSearchOpen && (
-          <div 
+          <div
             data-mobile-search
             className='fixed top-16 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg p-4 lg:hidden z-30 shadow-lg border-b border-gray-200/80 dark:border-gray-700/80 animate-slideDown origin-top'
           >
@@ -289,7 +268,7 @@ export default function Nav () {
 
         {/* Mobile Menu - Appears when hamburger is clicked */}
         {isMobileMenuOpen && (
-          <div 
+          <div
             data-mobile-menu
             className='fixed top-16 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg lg:hidden z-30 shadow-lg border-b border-gray-200/80 dark:border-gray-700/80 animate-slideDown origin-top'
           >
@@ -326,7 +305,7 @@ export default function Nav () {
                 <div className='flex items-center space-x-3 mb-4'>
                   <div className='h-12 w-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 p-0.5 shadow-md'>
                     <Image
-                      src={getProfileImage()}
+                      src={getProfileImageUrl(user.profileImage ?? '')}
                       alt={user.name}
                       width={48}
                       height={48}
@@ -457,14 +436,14 @@ export default function Nav () {
                 <Link
                   href={item.href}
                   className={`px-4 py-2.5 rounded-lg inline-block transition-all duration-300 relative ${
-                  pathname === item.href
-                    ? ' font-semibold shadow-lg scale-105 text-blue-500'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-gray-100 hover:scale-105'
+                    pathname === item.href
+                      ? ' font-semibold shadow-lg scale-105 text-blue-500'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-gray-100 hover:scale-105'
                   }`}
                 >
                   {item.label}
                   {pathname === item.href && (
-                  <span className="absolute bottom-0 left-0 right-0 h-1 bg-blue-400 dark:bg-blue-500 rounded-b-lg"></span>
+                    <span className='absolute bottom-0 left-0 right-0 h-1 bg-blue-400 dark:bg-blue-500 rounded-b-lg'></span>
                   )}
                 </Link>
               </li>
@@ -533,14 +512,14 @@ export default function Nav () {
               aria-label='User menu'
             >
               <Image
-                src={getProfileImage()}
+                src={getProfileImageUrl(user.profileImage ?? '')}
                 alt='User Avatar'
                 width={44}
                 height={44}
                 className='h-full w-full rounded-full object-cover'
                 onError={e => {
                   const target = e.target as HTMLImageElement
-                  target.src = '/default-avatar.png'
+                  target.src = APP_CONFIG.DEFAULT_AVATAR
                 }}
               />
             </button>
@@ -550,7 +529,7 @@ export default function Nav () {
                 <div className='px-4 py-3 border-b border-gray-200/80 dark:border-gray-700/80 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center space-x-3'>
                   <div className='h-12 w-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 p-0.5 shadow-md'>
                     <Image
-                      src={getProfileImage()}
+                      src={getProfileImageUrl(user.profileImage ?? '')}
                       alt={user.name}
                       width={48}
                       height={48}

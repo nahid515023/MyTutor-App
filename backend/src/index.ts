@@ -15,6 +15,7 @@ import { globalLimiter, authLimiter } from './config/rateLimiters';
 import { securityHeaders, requestLogger, sanitizeInput, detectSuspiciousActivity } from './middlewares/security';
 import { sessionMiddleware } from './middlewares/sessionManager';
 import './config/passport';
+import './services/meetingNotification'; // Import meeting notification service to initialize background scheduler
 
 const app = express();
 const server = createServer(app);
@@ -111,7 +112,8 @@ const io = new Server(server, {
     origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST']
-  }
+  },
+  transports: ['websocket', 'polling']
 });
 
 const onlineUsers = new Map<string, string>();
@@ -125,6 +127,18 @@ io.on('connection', (socket) => {
     logger.info('User connected to socket', { userId, socketId: socket.id });
   }
 
+  // Join conversation room
+  socket.on('joinConversation', (connectedId: string) => {
+    socket.join(connectedId);
+    logger.debug('User joined conversation', { userId, connectedId });
+  });
+
+  // Leave conversation room
+  socket.on('leaveConversation', (connectedId: string) => {
+    socket.leave(connectedId);
+    logger.debug('User left conversation', { userId, connectedId });
+  });
+
   socket.on('disconnect', () => {
     if (userId) {
       onlineUsers.delete(userId);
@@ -133,37 +147,103 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('sendMessage', async (message) => {
+  socket.on('sendMessage', async (message, callback) => {
     try {
       const newMessage = await prisma.chat.create({
         data: {
           senderId: message.senderId,
           receiverId: message.receiverId,
           message: message.message,
-          connectedId: message.connectedId
+          connectedId: message.connectedId,
+          type: message.type || 'text',
+          status: 'sent'
         }
       });
 
+      // Emit to all users in the conversation
+      io.to(message.connectedId).emit('newMessage', newMessage);
+      
+      // Send delivery status to sender
       const receiverSocketId = onlineUsers.get(message.receiverId);
       if (receiverSocketId) {
-        io.to(receiverSocketId).emit('newMessage', newMessage);
+        // Mark as delivered if receiver is online
+        await prisma.chat.update({
+          where: { id: newMessage.id },
+          data: { status: 'delivered' }
+        });
+        
+        io.to(receiverSocketId).emit('messageStatus', {
+          messageId: newMessage.id,
+          status: 'delivered'
+        });
+      }
+
+      // Send success callback to sender
+      if (callback) {
+        callback({ success: true, message: newMessage });
       }
       
       logger.debug('Message sent', { 
+        messageId: newMessage.id,
         senderId: message.senderId, 
         receiverId: message.receiverId 
       });
     } catch (error) {
       logger.error('Error saving message:', error);
+      if (callback) {
+        callback({ success: false, error: 'Failed to send message' });
+      }
       socket.emit('messageError', { error: 'Failed to send message' });
     }
   });
 
-  socket.on('typing', ({ receiverId, isTyping }) => {
-    const receiverSocketId = onlineUsers.get(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('userTyping', { connectedId: userId, isTyping });
+  socket.on('deleteMessage', async ({ messageId, connectedId }) => {
+    try {
+      await prisma.chat.delete({ where: { id: messageId } });
+      io.to(connectedId).emit('messageDeleted', messageId);
+      logger.debug('Message deleted', { messageId, userId });
+    } catch (error) {
+      logger.error('Error deleting message:', error);
+      socket.emit('messageError', { error: 'Failed to delete message' });
     }
+  });
+
+  socket.on('markAsRead', async ({ messageIds, connectedId }) => {
+    try {
+      await prisma.chat.updateMany({
+        where: {
+          id: { in: messageIds },
+          receiverId: userId
+        },
+        data: { status: 'read' }
+      });
+
+      // Notify sender about read status
+      for (const messageId of messageIds) {
+        const message = await prisma.chat.findUnique({
+          where: { id: messageId }
+        });
+        
+        if (message) {
+          const senderSocketId = onlineUsers.get(message.senderId);
+          if (senderSocketId) {
+            io.to(senderSocketId).emit('messageStatus', {
+              messageId,
+              status: 'read'
+            });
+          }
+        }
+      }
+
+      logger.debug('Messages marked as read', { messageIds, userId });
+    } catch (error) {
+      logger.error('Error marking messages as read:', error);
+    }
+  });
+
+  socket.on('typing', ({ connectedId, isTyping }) => {
+    socket.to(connectedId).emit('userTyping', { connectedId: userId, isTyping });
+    logger.debug('Typing status', { userId, connectedId, isTyping });
   });
 });
 
@@ -208,6 +288,7 @@ server.listen(PORT, async () => {
     logger.info(`📊 Environment: ${NODE_ENV}`);
     logger.info(`🔒 Security features enabled`);
     logger.info(`🌐 CORS origins: ${allowedOrigins.join(', ')}`);
+    logger.info(`🔔 Meeting notification service initialized`);
   } catch (error) {
     logger.error('Database connection error:', error);
     process.exit(1);

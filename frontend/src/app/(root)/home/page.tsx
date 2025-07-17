@@ -7,6 +7,7 @@ import PostCard from '@/components/postCard'
 import FilterOptions from '@/components/FilterOptions'
 import Pagination from '@/components/pagination'
 import { Post } from '@/types/post'
+import LoadingState from '@/components/loading/LoadingState'
 
 
 export default function HomePage () {
@@ -14,6 +15,7 @@ export default function HomePage () {
   const searchQuery = searchParams.get('search')
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [filterClass, setFilterClass] = useState('')
@@ -26,13 +28,23 @@ export default function HomePage () {
     const fetchPosts = async () => {
       try {
         setLoading(true)
+        setError(null)
         const response = await api.get<{ posts: Post[]; total: number }>(
           `/posts?page=${currentPage}&limit=${postsPerPage}&search=${searchQuery || ''}&class=${filterClass}&subject=${filterSubject}&medium=${filterMedium}`
         )
-        setPosts(response.data.posts)
-        setTotalPages(Math.ceil(response.data.total / postsPerPage))
+        
+        if (response.data && Array.isArray(response.data.posts)) {
+          setPosts(response.data.posts)
+          setTotalPages(Math.ceil(response.data.total / postsPerPage))
+        } else {
+          setPosts([])
+          setTotalPages(1)
+        }
       } catch (error) {
         console.error('Error fetching posts:', error)
+        setError('Failed to load posts. Please try again later.')
+        setPosts([])
+        setTotalPages(1)
       } finally {
         setLoading(false)
       }
@@ -62,28 +74,28 @@ export default function HomePage () {
     ? posts.filter(post => {
         const searchLower = searchQuery.toLowerCase()
         return (
-          post.description.toLowerCase().includes(searchLower) ||
-          post.subject.toLowerCase().includes(searchLower) ||
-          post.User.name.toLowerCase().includes(searchLower) ||
-          post.User.education.toLowerCase().includes(searchLower) ||
-          post.medium.toLowerCase().includes(searchLower) ||
-          post.Class.toLowerCase().includes(searchLower) ||
-          post.fees.toLowerCase().includes(searchLower) ||
-          post.preferableTime?.toLowerCase().includes(searchLower)
+          (post.description && post.description.toLowerCase().includes(searchLower)) ||
+          (post.subject && post.subject.toLowerCase().includes(searchLower)) ||
+          (post.User?.name && post.User.name.toLowerCase().includes(searchLower)) ||
+          (post.User?.education && post.User.education.toLowerCase().includes(searchLower)) ||
+          (post.medium && post.medium.toLowerCase().includes(searchLower)) ||
+          (post.Class && post.Class.toLowerCase().includes(searchLower)) ||
+          (post.fees && post.fees.toLowerCase().includes(searchLower)) ||
+          (post.preferableTime && post.preferableTime.toLowerCase().includes(searchLower))
         )
       })
     : posts.filter(post => {
         return (
-          (!filterClass || post.Class === filterClass) &&
-          (!filterSubject || post.subject === filterSubject) &&
-          (!filterMedium || post.medium === filterMedium)
+          (!filterClass || (post.Class && post.Class === filterClass)) &&
+          (!filterSubject || (post.subject && post.subject === filterSubject)) &&
+          (!filterMedium || (post.medium && post.medium === filterMedium))
         )
       })
 
   // Calculate pagination values
   const indexOfLastPost = currentPage * postsPerPage
   const indexOfFirstPost = indexOfLastPost - postsPerPage
-  const currentPosts = filtebluePosts.slice(indexOfFirstPost, indexOfLastPost)
+  const currentPosts = Array.isArray(filtebluePosts) ? filtebluePosts.slice(indexOfFirstPost, indexOfLastPost) : []
 
   const nextPage = () => {
     if (currentPage < totalPages) {
@@ -103,18 +115,28 @@ export default function HomePage () {
 
   // Helper function to format post creation date
   function getDateInPost (date: string) {
-    const postDate = new Date(date)
-    const currentDate = new Date()
-    const diff = currentDate.getTime() - postDate.getTime()
-    const days = diff / (1000 * 60 * 60 * 24)
-    if (days >= 1) {
-      return Math.floor(days) + ' days'
-    } else if (days * 24 >= 1) {
-      return Math.floor(days * 24) + ' hours'
-    } else if (days * 24 * 60 >= 1) {
-      return Math.floor(days * 24 * 60) + ' minutes'
-    } else {
-      return Math.floor(days * 24 * 60 * 60) + ' seconds'
+    if (!date) return 'Unknown'
+    
+    try {
+      const postDate = new Date(date)
+      if (isNaN(postDate.getTime())) return 'Unknown'
+      
+      const currentDate = new Date()
+      const diff = currentDate.getTime() - postDate.getTime()
+      const days = diff / (1000 * 60 * 60 * 24)
+      
+      if (days >= 1) {
+        return Math.floor(days) + ' days ago'
+      } else if (days * 24 >= 1) {
+        return Math.floor(days * 24) + ' hours ago'
+      } else if (days * 24 * 60 >= 1) {
+        return Math.floor(days * 24 * 60) + ' minutes ago'
+      } else {
+        return 'Just now'
+      }
+    } catch (error) {
+      console.error('Error parsing date:', error)
+      return 'Unknown'
     }
   }
 
@@ -134,12 +156,12 @@ export default function HomePage () {
       <div className='min-h-screen px-4 sm:px-6 lg:px-8'> 
         <div className='container mx-auto max-w-screen-xl'> 
           {searchQuery && (<div className='mb-10 text-center'> 
-            <h2 className='text-4xl sm:text-5xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-orange-500 to-amber-400 mt-12 mb-3'> {/* Enhanced title style */}
+            <h2 className='text-5xl sm:text-6xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 mt-12 mb-3'> {/* Enhanced title style */}
               Find Your Perfect Tutor
             </h2>
             {searchQuery ? (
               <div className='flex items-center justify-center gap-2.5 mt-2'> 
-                <p className='text-gray-700 dark:text-gray-300 text-lg sm:text-xl'>
+                <p className='text-gray-700 dark:text-gray-300 text-xl sm:text-2xl'>
                   Search results for &quot;{searchQuery}&quot;
                 </p>
                 <button
@@ -170,15 +192,16 @@ export default function HomePage () {
           </div>)}
 
           {/* Main content with filters */}
-          <div className='flex flex-col lg:flex-row gap-10'> {/* Increased gap and margin-top */}
-            {/* Filter section - 4/12 width */}
-            <div className='w-full lg:w-4/12 xl:w-3/12'> {/* Adjusted width for xl screens */}
-              <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 lg:sticky top-28 max-h-[calc(100vh-10rem)] overflow-y-auto'> {/* Enhanced card style */}
-                <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2.5'> {/* Enhanced title style */}
-                  <svg className='w-6 h-6 text-blue-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z' />
-                  </svg>
-                  Filter Posts
+          <div className='flex flex-col lg:flex-row gap-8'> 
+            <div className='w-full  mt-3 lg:w-4/12 xl:w-3/12'> 
+              <div className='bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 lg:sticky lg:top-24 max-h-[calc(100vh-8rem)] overflow-y-auto'> 
+                <h3 className='text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-3'> 
+                  <div className='p-2 bg-blue-100 dark:bg-blue-900 rounded-lg'>
+                    <svg className='w-5 h-5 text-blue-600 dark:text-blue-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z' />
+                    </svg>
+                  </div>
+                  <span>Filter Posts</span>
                 </h3>
                 <FilterOptions
                   filterClass={filterClass}
@@ -190,28 +213,42 @@ export default function HomePage () {
               </div>
             </div>
             
-            {/* Posts section - 8/12 width */}
-            <div className='w-full lg:w-8/12 xl:w-9/12'> {/* Adjusted width for xl screens */}
+            {/* Posts section - responsive width */}
+            <div className='w-full lg:w-8/12 xl:w-9/12'>
+              {/* Error state */}
+              {error && (
+                <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 mb-6'>
+                  <div className='flex items-center'>
+                    <svg className='w-6 h-6 text-red-500 mr-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                    </svg>
+                    <p className='text-red-700 dark:text-red-300 font-medium'>{error}</p>
+                  </div>
+                </div>
+              )}
+              
               {/* Loading state */}
               {loading ? (
-                <div className='flex flex-col justify-center items-center py-20 text-center'> {/* Increased padding */}
-                  <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4'></div> {/* Spinner */}
-                  <p className='text-lg font-semibold text-gray-700 dark:text-gray-300'>Loading posts...</p>
-                  <p className='text-sm text-gray-500 dark:text-gray-400'>Please wait a moment.</p>
-                </div>
+                <LoadingState
+                  title="Loading Posts"
+                  message="Fetching the latest tutor posts for you..."
+                  size="large"
+                />
               ) : (
                 <>
                   {/* Posts Listed Row by Row */}
                   <div className='flex flex-col gap-8 m-3'> {/* Increased gap */}
                     {currentPosts.length > 0 ? (
-                      currentPosts.map(post => (
-                        <PostCard
-                          key={post.id}
-                          post={post}
-                          booked={post.booked}
-                          getDateInPost={getDateInPost}
-                        />
-                      ))
+                      currentPosts
+                        .filter(post => post && post.id) // Filter out any null/undefined posts
+                        .map(post => (
+                          <PostCard
+                            key={post.id}
+                            post={post}
+                            booked={post.booked || false}
+                            getDateInPost={getDateInPost}
+                          />
+                        ))
                     ) : (
                       <div className='bg-white dark:bg-gray-800 shadow-xl rounded-xl p-10 text-center'> {/* Enhanced card style */}
                         <svg className='mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4' fill='none' viewBox='0 0 24 24' stroke='currentColor' aria-hidden='true'>
@@ -234,7 +271,7 @@ export default function HomePage () {
                   </div>
 
                   {/* Pagination */}
-                  {filtebluePosts.length > postsPerPage && (
+                  {Array.isArray(filtebluePosts) && filtebluePosts.length > postsPerPage && !loading && !error && (
                     <Pagination
                       currentPage={currentPage}
                       totalPages={totalPages}

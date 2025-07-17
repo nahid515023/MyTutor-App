@@ -5,7 +5,8 @@ import {
   deleteChat,
   disconnectUser,
   getChat,
-  getConnectedUsers
+  getConnectedUsers,
+  uploadChatImage
 } from '../controllers/chat'
 import { authMiddleware } from '../middlewares/auth'
 
@@ -23,5 +24,6 @@ chatRouter.delete(
 chatRouter.get('/chats/:connectedId', authMiddleware, getChat)
 chatRouter.post('/chats', authMiddleware, createChat)
 chatRouter.delete('/chats/:id', authMiddleware, deleteChat)
+chatRouter.post('/upload-image', authMiddleware, ...uploadChatImage)
 
 export default chatRouter
