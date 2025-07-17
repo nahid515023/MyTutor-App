@@ -10,6 +10,7 @@ import { api } from '@/_lib/api'
 import { showToast } from '@/utils/toastService'
 import { Post, User, TutorRequest, MeetingData } from '@/types/post'
 import { subjectOptions, classLevels } from '@/lib/subjectAndClass'
+import { getProfileImageUrl } from '@/utils/getProfileImage'
 
 // Type definitions
 interface FormData {
@@ -477,7 +478,7 @@ export default function PostPage() {
             <div className='flex flex-col sm:flex-row items-center gap-4'>
               <div className='w-16 h-16 rounded-full overflow-hidden ring-2 ring-blue-400 dark:ring-blue-500 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-750'>
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_API_URL_IMAGE}${post.User.profileImage}`}
+                  src={getProfileImageUrl(post.User.profileImage)}
                   alt={post.User.name}
                   width={64}
                   height={64}

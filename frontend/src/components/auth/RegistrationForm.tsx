@@ -11,7 +11,7 @@ import Image from 'next/image'
 
 // Reusable Error Message Component
 const ErrorMessage = ({ message }: { message: string }) => (
-  <p className="text-red-500 text-sm mt-1 text-center animate-fadeIn">{`${message}. Please try again.`}</p>
+  <p className="text-red-500 dark:text-red-400 text-sm mt-1 text-center animate-fadeIn">{`${message}. Please try again.`}</p>
 )
 
 interface RegistrationFormProps {
@@ -96,13 +96,13 @@ export default function RegistrationForm({
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center px-4 py-4'>
+    <div className='min-h-screen flex items-center justify-center px-4 py-4 bg-gray-50 dark:bg-gray-900'>
       <div className='w-full max-w-md'>
-        <div className='bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden'>
+        <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden'>
           <div className='px-8 pt-8 pb-3'>
             <div className='text-center'>
-              <h2 className='text-3xl font-bold mb-2 text-blue-500'>{title}</h2>
-              <p className='text-gray-600 text-sm'>{subtitle}</p>
+              <h2 className='text-3xl font-bold mb-2 text-blue-500 dark:text-blue-400'>{title}</h2>
+              <p className='text-gray-600 dark:text-gray-300 text-sm'>{subtitle}</p>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ export default function RegistrationForm({
             <form className='space-y-6' onSubmit={handleRegistration}>
               <div className='space-y-3'>
                 <div className='flex flex-col items-center space-y-4'>
-                  <div className='relative w-32 h-32 rounded-full overflow-hidden border-2 border-gray-300'>
+                  <div className='relative w-32 h-32 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600'>
                     {profilePreview ? (
                       <Image
                         src={profilePreview}
@@ -119,8 +119,8 @@ export default function RegistrationForm({
                         className="object-cover"
                       />
                     ) : (
-                      <div className='w-full h-full bg-gray-100 flex items-center justify-center'>
-                        <FaUser className='w-12 h-12 text-gray-400' />
+                      <div className='w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center'>
+                        <FaUser className='w-12 h-12 text-gray-400 dark:text-gray-500' />
                       </div>
                     )}
                   </div>
@@ -134,7 +134,7 @@ export default function RegistrationForm({
                   />
                   <label
                     htmlFor='profileImage'
-                    className='cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-500'
+                    className='cursor-pointer text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300'
                   >
                     Upload Profile Picture
                   </label>
@@ -142,18 +142,18 @@ export default function RegistrationForm({
 
                 {/* Name Input */}
                 <div className='space-y-2'>
-                  <label htmlFor='name' className='block text-sm font-semibold text-gray-700'>
+                  <label htmlFor='name' className='block text-sm font-semibold text-gray-700 dark:text-gray-300'>
                     Full Name
                   </label>
                   <div className='relative group'>
                     <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                      <FaUser className='h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors' />
+                      <FaUser className='h-4 w-4 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400 transition-colors' />
                     </div>
                     <input
                       id='name'
                       type='text'
                       required
-                      className='w-full pl-11 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 hover:border-gray-300'
+                      className='w-full pl-11 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/50 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                       placeholder='Enter your full name'
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -164,18 +164,18 @@ export default function RegistrationForm({
 
                 {/* Email Input */}
                 <div className='space-y-2'>
-                  <label htmlFor='email' className='block text-sm font-semibold text-gray-700'>
+                  <label htmlFor='email' className='block text-sm font-semibold text-gray-700 dark:text-gray-300'>
                     Email Address
                   </label>
                   <div className='relative group'>
                     <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                      <FaEnvelope className='h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors' />
+                      <FaEnvelope className='h-4 w-4 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400 transition-colors' />
                     </div>
                     <input
                       id='email'
                       type='email'
                       required
-                      className='w-full pl-11 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 hover:border-gray-300'
+                      className='w-full pl-11 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/50 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                       placeholder='Enter your email address'
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -187,18 +187,18 @@ export default function RegistrationForm({
 
                 {/* Password Input */}
                 <div className='space-y-2'>
-                  <label htmlFor='password' className='block text-sm font-semibold text-gray-700'>
+                  <label htmlFor='password' className='block text-sm font-semibold text-gray-700 dark:text-gray-300'>
                   Password
                   </label>
                   <div className='relative group'>
                   <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                    <FaLock className='h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors' />
+                    <FaLock className='h-4 w-4 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400 transition-colors' />
                   </div>
                   <input
                     id='password'
                     type={showPassword ? 'text' : 'password'}
                     required
-                    className='w-full pl-11 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 hover:border-gray-300'
+                    className='w-full pl-11 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/50 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                     placeholder='Create a password'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -210,9 +210,9 @@ export default function RegistrationForm({
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                    <FaEyeSlash className='h-4 w-4 text-gray-400 hover:text-gray-600' />
+                    <FaEyeSlash className='h-4 w-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300' />
                     ) : (
-                    <FaEye className='h-4 w-4 text-gray-400 hover:text-gray-600' />
+                    <FaEye className='h-4 w-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300' />
                     )}
                   </button>
                   </div>
@@ -256,10 +256,10 @@ export default function RegistrationForm({
 
               <div className='relative my-8'>
                 <div className='absolute inset-0 flex items-center'>
-                  <div className='w-full border-t border-gray-200'></div>
+                  <div className='w-full border-t border-gray-200 dark:border-gray-600'></div>
                 </div>
                 <div className='relative flex justify-center text-sm'>
-                  <span className='px-4 bg-white text-gray-500 font-medium'>
+                  <span className='px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium'>
                     Or continue with
                   </span>
                 </div>
@@ -271,12 +271,12 @@ export default function RegistrationForm({
             </form>
           </div>
 
-          <div className='px-8 py-6 bg-gray-50 border-t border-gray-100'>
-            <p className='text-center text-sm text-gray-600'>
+          <div className='px-8 py-6 mt-8 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600'>
+            <p className='text-center text-sm text-gray-600 dark:text-gray-300'>
               Already have an account?{' '}
               <Link
                 href={`/${role === 'STUDENT' ? 'student' : 'teacher'}/signin`}
-                className='font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors'
+                className='font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors'
               >
                 Sign in
               </Link>
@@ -285,7 +285,7 @@ export default function RegistrationForm({
         </div>
 
         <div className='mt-6 text-center'>
-          <p className='text-xs text-gray-500'>
+          <p className='text-xs text-gray-500 dark:text-gray-400'>
             By registering, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>

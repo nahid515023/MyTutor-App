@@ -142,6 +142,8 @@ model Chat {
   senderId    String
   receiverId  String
   message     String?
+  type        String           @default("text") // text, image
+  status      String           @default("sent") // sent, delivered, read
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   Connected   ConnectedAccount @relation(fields: [connectedId], references: [id], onDelete: Cascade)

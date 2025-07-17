@@ -67,12 +67,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='min-h-screen'>
-      <div className='flex flex-col w-8/12 mx-auto mt-4'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300'>
+      <div className='flex flex-col w-8/12 mx-auto pt-4 pb-8'>
         {user && (
           <CoverAndProfilePic userData={user} isUserProfile={isUserProfile} />
         )}
-        <div className='mt-3 transform duration-200 ease-in-out flex flex-col lg:flex-row gap-5 h-full'>
+        <div className='mt-6 transform duration-200 ease-in-out flex flex-col lg:flex-row gap-6 h-full'>
           {user && (
             <AboutComponent userData={user} isUserProfile={isUserProfile} />
           )}

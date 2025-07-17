@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { api } from '@/_lib/api'
-import Cookies from 'js-cookie'
 import { showToast } from '@/utils/toastService'
-import { getProfileImageUrl } from '@/utils/getProfileImage'
+import {getProfileImageUrl} from '@/utils/getProfileImage'
+import { getUserData } from '@/utils/cookiesUserData'
+import LoadingState from '@/components/loading/LoadingState'
 
 interface Tutor {
   id: number
@@ -43,33 +44,8 @@ export default function TutorsPage () {
   )
   // Get logged in user id from cookies
   useEffect(() => {
-    const cookies = Cookies.get('user')
-    if (cookies) {
-      try {
-        // Handle the case where cookie might start with 'j:' (some cookie parsers add this)
-        const sanitizedCookies = cookies.startsWith('j:')
-          ? cookies.substring(2)
-          : cookies
-        const parsedCookies = JSON.parse(sanitizedCookies)
-
-        // Type guard to ensure the parsed data has the expected structure
-        if (
-          parsedCookies &&
-          typeof parsedCookies === 'object' &&
-          'id' in parsedCookies
-        ) {
-          setCurrentUserId(Number(parsedCookies.id) || null)
-        } else {
-          console.warn('Invalid user data structure in cookies')
-          setCurrentUserId(null)
-        }
-      } catch (error) {
-        console.error('Error parsing user cookie:', error)
-        setCurrentUserId(null)
-      }
-    } else {
-      setCurrentUserId(null)
-    }
+        const userData = getUserData()
+        setCurrentUserId(userData?.id || null)
   }, [])
 
   // Fetch tutors
@@ -157,14 +133,14 @@ export default function TutorsPage () {
   }
 
   return (
-    <div className='min-h-screen mt-4'>
-      <div className='container mx-auto px-4 max-w-7xl min-h-screen'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
+      <div className='container pt-4 mx-auto px-4 max-w-7xl min-h-screen'>
         {/* Filter Section */}
-        <div className='bg-white dark:bg-blue-900 rounded-2xl shadow-lg px-8 py-4 mb-4 transform transition-all duration-300 hover:shadow-xl border-t-4 border-blue-500 dark:border-blue-400'>
-          <h3 className='text-xl font-semibold text-gray-800 dark:text-blue-200 mb-6 flex items-center'>
-            <span className='w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center mr-3'>
+        <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-lg px-8 py-4 mb-4 transform transition-all duration-300 hover:shadow-xl border-t-4 border-blue-500 dark:border-blue-400 dark:shadow-2xl'>
+          <h3 className='text-xl font-semibold text-gray-800 dark:text-gray-100 mb-6 flex items-center'>
+            <span className='w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-lg flex items-center justify-center mr-3'>
               <svg
-                className='w-5 h-5 text-blue-500 dark:text-blue-300'
+                className='w-5 h-5 text-blue-500 dark:text-blue-400'
                 fill='none'
                 stroke='currentColor'
                 viewBox='0 0 24 24'
@@ -182,7 +158,7 @@ export default function TutorsPage () {
           <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
             {/* Search by name */}
             <div className='relative'>
-              <label className='block text-sm font-medium text-gray-700 dark:text-blue-300 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 Search by Name
               </label>
               <div className='relative'>
@@ -191,10 +167,10 @@ export default function TutorsPage () {
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   placeholder='Search tutors...'
-                  className='w-full px-4 py-3 border border-gray-300 dark:border-blue-600 rounded-xl bg-white dark:bg-blue-800 text-gray-800 dark:text-blue-200 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all duration-200 shadow-sm hover:shadow-md'
+                  className='w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all duration-200 shadow-sm hover:shadow-md'
                 />
                 <svg
-                  className='w-5 h-5 text-gray-400 dark:text-blue-500 absolute right-3 top-1/2 transform -translate-y-1/2'
+                  className='w-5 h-5 text-gray-400 dark:text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -211,13 +187,13 @@ export default function TutorsPage () {
 
             {/* Filter by skill */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 dark:text-blue-300 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 Filter by Skill
               </label>
               <select
                 value={selectedSkill}
                 onChange={e => setSelectedSkill(e.target.value)}
-                className='w-full px-4 py-3 border border-gray-300 dark:border-blue-600 rounded-xl bg-white dark:bg-blue-800 text-gray-800 dark:text-blue-200 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all duration-200 shadow-sm hover:shadow-md appearance-none'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all duration-200 shadow-sm hover:shadow-md appearance-none'
               >
                 <option value=''>All Skills</option>
                 {allSkills.length > 0 &&
@@ -231,13 +207,13 @@ export default function TutorsPage () {
 
             {/* Filter by rating */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 dark:text-blue-300 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 Minimum Rating
               </label>
               <select
                 value={minRating}
                 onChange={e => setMinRating(Number(e.target.value))}
-                className='w-full px-4 py-3 border border-gray-300 dark:border-blue-600 rounded-xl bg-white dark:bg-blue-800 text-gray-800 dark:text-blue-200 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all duration-200 shadow-sm hover:shadow-md appearance-none'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all duration-200 shadow-sm hover:shadow-md appearance-none'
               >
                 <option value={0}>Any Rating</option>
                 <option value={1}>⭐ and above</option>
@@ -252,7 +228,7 @@ export default function TutorsPage () {
             <div className='flex items-end'>
               <button
                 onClick={resetFilters}
-                className='w-full px-4 py-3 bg-gray-100 dark:bg-blue-800 text-gray-700 dark:text-blue-300 rounded-xl hover:bg-gray-200 dark:hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2'
+                className='w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2'
               >
                 <svg
                   className='w-5 h-5'
@@ -277,7 +253,7 @@ export default function TutorsPage () {
         <div className='flex justify-between items-center mb-2'>
           <div className='flex items-center'>
             <div className='w-1 h-8 bg-blue-500 dark:bg-blue-600 rounded-r mr-3'></div>
-            <p className='text-gray-600 dark:text-gray-400 font-medium'>
+            <p className='text-gray-600 dark:text-gray-300 font-medium'>
               Showing{' '}
               <span className='font-bold text-blue-600 dark:text-blue-400'>
                 {filteredTutors.length}
@@ -289,35 +265,11 @@ export default function TutorsPage () {
 
         {/* Loading state */}
         {isLoading ? (
-          <div className='flex flex-col justify-center items-center h-96 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-700'>
-            <div className='relative'>
-              <div className='absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-amber-500 dark:from-blue-600 dark:to-amber-600 blur-xl opacity-20 animate-pulse'></div>
-              <div className='relative animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-blue-500 dark:border-blue-400'></div>
-            </div>
-            <div className='mt-8 text-center'>
-              <h3 className='text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2'>
-                Finding Your Tutors
-              </h3>
-              <p className='text-gray-600 dark:text-gray-400'>
-                We&apos;re matching you with the perfect tutors for your
-                needs...
-              </p>
-            </div>
-            <div className='mt-6 flex gap-2'>
-              <div
-                className='w-3 h-3 rounded-full bg-blue-500 dark:bg-blue-400 animate-bounce'
-                style={{ animationDelay: '0ms' }}
-              ></div>
-              <div
-                className='w-3 h-3 rounded-full bg-amber-500 dark:bg-amber-400 animate-bounce'
-                style={{ animationDelay: '150ms' }}
-              ></div>
-              <div
-                className='w-3 h-3 rounded-full bg-blue-500 dark:bg-blue-400 animate-bounce'
-                style={{ animationDelay: '300ms' }}
-              ></div>
-            </div>
-          </div>
+          <LoadingState
+            title="Finding Your Tutors"
+            message="We're matching you with the perfect tutors for your needs..."
+            size="large"
+          />
         ) : filteredTutors.length === 0 ? (
           <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center transform transition-all duration-300 hover:shadow-xl border border-gray-100 dark:border-gray-700'>
             <div className='relative w-24 h-24 mx-auto mb-6'>
@@ -362,14 +314,12 @@ export default function TutorsPage () {
                 >
                   <div className='flex flex-col items-center p-6 relative'>
                     <div className='relative mb-4'>
-                      <div className='absolute -top-2 -left-2 w-32 h-32 bg-blue-100 dark:bg-blue-900/30 rounded-full opacity-50 blur-md'></div>
-                      <div className='relative w-24 h-24 rounded-full overflow-hidden ring-[3px] ring-white dark:ring-gray-800 shadow-xl'>
+                      <div className='absolute -top-2 -left-2 w-32 h-32 bg-blue-100 dark:bg-blue-800/20 rounded-full opacity-50 blur-md'></div>
+                      <div className='relative w-24 h-24 rounded-full overflow-hidden ring-[3px] ring-white dark:ring-gray-700 shadow-xl'>
                         <Image
                           className='w-full h-full object-cover'
                           src={
-                            tutor.profileImage.startsWith('http')
-                              ? `${tutor.profileImage}`
-                              : `${process.env.NEXT_PUBLIC_API_URL_IMAGE}${tutor.profileImage}`
+                            getProfileImageUrl(tutor.profileImage)
                           }
                           alt={`${tutor.name} profile`}
                           width={96}
@@ -406,7 +356,7 @@ export default function TutorsPage () {
                           .map((skill, index) => (
                             <span
                               key={index}
-                              className='text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-lg'
+                              className='text-xs font-medium bg-blue-50 dark:bg-blue-800/40 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-lg'
                             >
                               {skill}
                             </span>
@@ -415,7 +365,7 @@ export default function TutorsPage () {
                         tutor.skills
                           .split('#')
                           .filter(skill => skill.trim() !== '').length > 3 && (
-                          <span className='text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 px-2 py-0.5 rounded-lg'>
+                          <span className='text-xs font-medium bg-amber-50 dark:bg-amber-800/40 text-amber-600 dark:text-amber-300 px-2 py-0.5 rounded-lg'>
                             +
                             {tutor.skills
                               .split('#')

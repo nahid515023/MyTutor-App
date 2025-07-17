@@ -4,6 +4,7 @@ import { ConnectedUser } from '@/types/chat'
 import { getProfileImageUrl } from '@/utils/chat/helpers'
 import dynamic from 'next/dynamic'
 import { formatDistanceToNow } from 'date-fns'
+import LoadingState from '../LoadingState'
 
 const TimeDisplay = dynamic(
   () =>
@@ -79,9 +80,12 @@ const ConversationList: FC<ConversationListProps> = ({
       </div>
       <div className='flex-1 overflow-y-auto'>
         {isLoading ? (
-          <div className='flex justify-center items-center h-full'>
-            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500'></div>
-          </div>
+          <LoadingState
+            title='Loading Conversations'
+            message='Fetching your conversations...'
+            size='medium'
+            className='h-full flex items-center justify-center'
+          />
         ) : error ? (
           <div className='flex justify-center items-center h-full'>
             <p className='text-red-500 dark:text-red-400'>{error}</p>

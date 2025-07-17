@@ -26,6 +26,8 @@ export default function MessagePage() {
     searchTerm,
     messageSearchTerm,
     onlineUsers,
+    isUploading,
+    handleImageUpload,
     handleSend,
     handleRetryMessage,
     handleDeleteMessage,
@@ -47,6 +49,17 @@ export default function MessagePage() {
   return (
     <div className='min-h-screen'>
       <main className='container mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+        {error && (
+          <div className='mb-4 p-4 bg-red-50 border border-red-200 rounded-lg'>
+            <div className='flex items-center'>
+              <svg className='w-5 h-5 text-red-500 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+              </svg>
+              <p className='text-red-700 text-sm'>{error}</p>
+            </div>
+          </div>
+        )}
+        
         <div className='flex flex-col md:flex-row gap-4 h-[calc(100vh-12rem)]'>
           <ConversationList
             conversations={conversations}
@@ -85,6 +98,8 @@ export default function MessagePage() {
                 onInputChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 onSend={handleSend}
+                onImageUpload={handleImageUpload}
+                isUploading={isUploading}
                 inputRef={inputRef}
                 fileInputRef={fileInputRef}
               />

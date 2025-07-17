@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { prisma } from '..'
+import EmailService from '../services/email'
+import MeetingNotificationService from '../services/meetingNotification'
 
 export const createMeeting = async (
   req: Request,
@@ -179,6 +181,71 @@ export const getMeetingsByPostId = async (
     res.status(200).json(meetings)
   } catch (error) {
     console.error('Error fetching meetings by post ID:', error)
+    next(error)
+  }
+}
+
+export const checkUpcomingMeetings = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.params
+    const now = new Date()
+    const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000)
+
+    // Find meetings starting within 30 minutes
+    const upcomingMeetings = await prisma.meeting.findMany({
+      where: {
+        OR: [
+          { userId: userId },
+          { teacherId: userId }
+        ],
+        start: {
+          gte: now,
+          lte: thirtyMinutesFromNow
+        }
+      },
+      include: {
+        User: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        Teacher: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    })
+
+    res.status(200).json(upcomingMeetings)
+  } catch (error) {
+    console.error('Error checking upcoming meetings:', error)
+    next(error)
+  }
+}
+
+export const sendMeetingNotifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await MeetingNotificationService.sendImmediateNotifications()
+    
+    res.status(200).json({ 
+      message: 'Notifications sent successfully',
+      meetingsNotified: result.meetingsNotified
+    })
+  } catch (error) {
+    console.error('Error sending meeting notifications:', error)
     next(error)
   }
 }

@@ -6,6 +6,7 @@ import { FaCamera, FaEdit } from 'react-icons/fa'
 import { api } from '@/_lib/api'
 import { showToast } from '@/utils/toastService'
 import Cookies from 'js-cookie'
+import { getProfileImageUrl } from '@/utils/getProfileImage'
 
 interface UserData {
   id: string
@@ -48,24 +49,10 @@ export default function ProfileCard({
   const [editedBio, setEditedBio] = useState(userData.bio || '')
   const [localUserData, setLocalUserData] = useState(userData)
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL_IMAGE
 
   console.log('userData: ', userData)
   
 
-  // Create formatted image URL
-  const getImageUrl = useCallback((imagePath: string | null, defaultImage: string) => {
-    if (!apiBaseUrl) return '';
-    
-    // If image path is provided and starts with http, use it directly
-    if (imagePath && imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    
-    // Otherwise construct URL from API base and image path or default
-    const path = imagePath || defaultImage;
-    return `${apiBaseUrl}${path}`;
-  }, [apiBaseUrl]);
 
 
   // Initialize when userData changes
@@ -73,11 +60,12 @@ export default function ProfileCard({
     if (!userData) return;
     
     setLocalUserData(userData);
-    setProfilePic(getImageUrl(userData.profileImage, 'avatar.jpg'));
-    setCoverPhoto(getImageUrl(userData.coverImage, 'coverPhoto.jpg'));
+    setProfilePic(getProfileImageUrl(userData.profileImage));
+    // Handle cover image separately - use default cover if no cover image
+    setCoverPhoto(userData.coverImage ? getProfileImageUrl(userData.coverImage) : '/default-cover.svg');
     setEditedName(userData.name);
     setEditedBio(userData.bio || '');
-  }, [userData, getImageUrl]);
+  }, [userData]);
 
 
   // Handle file selection and immediately upload
@@ -93,22 +81,39 @@ export default function ProfileCard({
   // Upload preview + API call
   const handleImageUpload = useCallback(
     async (file: File, type: 'profilePic' | 'coverPhoto') => {
-      setIsLoading(true)
-      try {
-        // preview locally
-        const reader = new FileReader()
-        reader.onload = () => {
-          if (typeof reader.result === 'string') {
-            if (type === 'profilePic') {
-              setProfilePic(reader.result);
-            } else {
-              setCoverPhoto(reader.result);
-            }
-          }
-        }
-        reader.readAsDataURL(file)
+      if (!file) {
+        showToast('error', 'Please select a valid image file');
+        return;
+      }
 
-        // send to server
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showToast('error', 'Please select an image file');
+        return;
+      }
+
+      // Validate file size (2MB limit - reduced from 5MB)
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxSize) {
+        showToast('error', 'Image size must be less than 2MB');
+        return;
+      }
+
+      setIsLoading(true)
+      let previewUrl: string | null = null
+      
+      try {
+        // Create preview URL for immediate display
+        previewUrl = URL.createObjectURL(file);
+        
+        // Set preview immediately
+        if (type === 'profilePic') {
+          setProfilePic(previewUrl);
+        } else {
+          setCoverPhoto(previewUrl);
+        }
+
+        // Send to server
         const formData = new FormData()
         formData.append(type, file)
 
@@ -127,6 +132,18 @@ export default function ProfileCard({
           Cookies.set('user', JSON.stringify(user))
           setLocalUserData(user)
           
+          // Clean up preview URL before setting new one
+          if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+          }
+          
+          // Update with actual server URL
+          if (type === 'profilePic') {
+            setProfilePic(getProfileImageUrl(user.profileImage));
+          } else {
+            setCoverPhoto(user.coverImage ? getProfileImageUrl(user.coverImage) : '/default-cover.svg');
+          }
+          
           showToast(
             'success',
             `${
@@ -135,16 +152,33 @@ export default function ProfileCard({
           )
           onProfileUpdate?.()
         } else {
+          // Revert to previous image on failure
+          if (type === 'profilePic') {
+            setProfilePic(getProfileImageUrl(localUserData.profileImage));
+          } else {
+            setCoverPhoto(localUserData.coverImage ? getProfileImageUrl(localUserData.coverImage) : '/default-cover.svg');
+          }
           showToast('error', `Failed to upload ${type}`)
         }
+        
       } catch (err) {
         console.error(err)
+        // Revert to previous image on error
+        if (type === 'profilePic') {
+          setProfilePic(getProfileImageUrl(localUserData.profileImage));
+        } else {
+          setCoverPhoto(localUserData.coverImage ? getProfileImageUrl(localUserData.coverImage) : '/default-cover.svg');
+        }
         showToast('error', `An error occurred while uploading ${type}`)
       } finally {
+        // Always clean up preview URL
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+        }
         setIsLoading(false)
       }
     },
-    [onProfileUpdate]
+    [onProfileUpdate, localUserData]
   )
 
   const handleSaveProfile = async () => {
@@ -193,18 +227,19 @@ export default function ProfileCard({
       {/* Cover Photo */}
       <div className="relative h-64 sm:h-72 md:h-80 overflow-hidden group">
         <Image
-          src={coverPhoto}
+          src={coverPhoto || '/default-cover.svg'}
           alt={`${localUserData.name}'s cover photo`}
           width={1200}
           height={400}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          priority
+          priority={false}
+          onError={() => setCoverPhoto('/default-cover.svg')}
         />
         {isUserProfile && (
           <div className="absolute top-4 right-4 z-10">
             <label
               htmlFor="coverPhotoInput"
-              className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-blue-600 dark:text-blue-400 px-4 py-2 rounded-lg shadow-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 transition-all flex items-center gap-2 transform hover:scale-105"
+              className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-blue-600 dark:text-blue-300 px-4 py-2 rounded-lg shadow-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all flex items-center gap-2 transform hover:scale-105 cursor-pointer"
             >
               <FaCamera className="h-4 w-4" />
               Change Cover
@@ -224,23 +259,24 @@ export default function ProfileCard({
       {/* Profile Picture */}
       <div className="relative flex justify-center -mt-24 sm:-mt-28">
         <div className="relative group">
-          <div className="h-40 w-40 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-xl bg-white dark:bg-gray-700 transform transition-transform duration-500 group-hover:scale-105">
+          <div className="h-40 w-40 rounded-full overflow-hidden border-4 border-white dark:border-gray-700 shadow-xl bg-white dark:bg-gray-800 transform transition-transform duration-500 group-hover:scale-105">
             <Image
-              src={profilePic}
+              src={profilePic || '/default-avatar.svg'}
               alt={`${localUserData.name}'s profile picture`}
               width={160}
               height={160}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-              priority
+              priority={true}
+              onError={() => setProfilePic('/default-avatar.svg')}
             />
           </div>
           {isUserProfile && (
             <>
               <label
                 htmlFor="profilePicInput"
-                className="absolute bottom-1 right-1 bg-white dark:bg-gray-700 p-3 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-transform transform hover:scale-110 flex items-center justify-center"
+                className="absolute bottom-1 right-1 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-transform transform hover:scale-110 flex items-center justify-center cursor-pointer"
               >
-                <FaCamera className="text-blue-600 dark:text-blue-400 h-5 w-5" />
+                <FaCamera className="text-blue-600 dark:text-blue-300 h-5 w-5" />
               </label>
               <input
                 id="profilePicInput"

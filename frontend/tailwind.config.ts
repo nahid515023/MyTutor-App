@@ -45,17 +45,22 @@ const config: Config = {
         },
         fontFamily: {
           sans: [
-            '-apple-system',
-            'BlinkMacSystemFont',
-            'Segoe UI',
+            'Inter',
             'Roboto',
-            'Oxygen-Sans',
-            'Ubuntu',
-            'Cantarell',
             'Helvetica Neue',
             'sans-serif',
           ],
           serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+        },
+        fontSize: {
+          'body': ['1rem', { lineHeight: '1.6' }],          // 16px - Body text
+          'small': ['0.875rem', { lineHeight: '1.4' }],     // 14px - Small text
+          'h1': ['2.25rem', { lineHeight: '1.2' }],         // 36px - H1
+          'h2': ['1.75rem', { lineHeight: '1.3' }],         // 28px - H2
+          'h3': ['1.375rem', { lineHeight: '1.4' }],        // 22px - H3
+          'button': ['1rem', { lineHeight: '1.5' }],        // 16px - Buttons
+          'nav': ['1rem', { lineHeight: '1.5' }],           // 16px - Navigation
+          'nav-lg': ['1.125rem', { lineHeight: '1.5' }],    // 18px - Large navigation
         },
         borderRadius: {
           lg: "var(--radius)",

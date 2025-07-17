@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { api } from '@/_lib/api'
 import Cookies from 'js-cookie'
@@ -17,6 +17,7 @@ export const useChat = () => {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [onlineUsers, setOnlineUsers] = useState<string[]>([])
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const chatEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -30,7 +31,7 @@ export const useChat = () => {
     conversationsRef.current = conversations
   }, [conversations])
 
-  const getUserFromCookies = () => {
+  const getUserFromCookies = useCallback(() => {
     try {
       const userCookie = Cookies.get('user')
       if (!userCookie) return null
@@ -39,92 +40,150 @@ export const useChat = () => {
       console.error('Error parsing user cookie:', e)
       return null
     }
-  }
+  }, [])
 
   const user = getUserFromCookies()
   const userId = user?.id
 
-  // Socket initialization
+  // Improved socket initialization with reconnection logic
   useEffect(() => {
     if (!userId) return
 
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
-    try {
-      const newSocket = io(socketUrl, {
-        query: { userId },
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000
-      })
-
-
-      newSocket.on('onlineUsers', (users: string[]) => {
-        if (Array.isArray(users)) {
-          setOnlineUsers(users)
-        }
-      })
-
-      newSocket.on('newMessage', (message: Chat) => {
-        if (!message || !message.senderId) return
-
-        setConversations(prev => {
-          const updatedConversations = prev.map(convo => {
-            if (convo.id === message.connectedId) {
-              return {
-                ...convo,
-                lastMessage: {
-                  message: message.message,
-                  createdAt: message.createdAt,
-                  type: message.type
-                }
-              }
-            }
-            return convo
-          })
-          return updatedConversations.sort((a, b) => {
-            const timeA = a.lastMessage?.createdAt || a.updatedAt
-            const timeB = b.lastMessage?.createdAt || b.updatedAt
-            return new Date(timeB).getTime() - new Date(timeA).getTime()
-          })
+    const timeoutId: ReturnType<typeof setTimeout> | null = null
+    
+    const connectSocket = () => {
+      try {
+        const newSocket = io(socketUrl, {
+          query: { userId },
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          timeout: 10000,
+          transports: ['websocket', 'polling']
         })
 
-        if (message.connectedId === currentConversation) {
-          setMessages(prev => {
-            if (message.senderId === userId) {
-              let replaced = false
-              return prev.map(msg => {
-                if (!replaced && msg.id.startsWith('temp-') && msg.message === message.message) {
-                  replaced = true
-                  return { ...message, status: 'sent' }
+        newSocket.on('connect', () => {
+          console.log('Connected to socket server')
+          setError(null)
+          if (currentConversation) {
+            newSocket.emit('joinConversation', currentConversation)
+          }
+        })
+
+        newSocket.on('disconnect', (reason) => {
+          console.log('Disconnected from socket server:', reason)
+          if (reason === 'io server disconnect') {
+            // Server disconnected, try to reconnect
+            newSocket.connect()
+          }
+        })
+
+        newSocket.on('connect_error', (error) => {
+          console.error('Socket connection error:', error)
+          setError('Connection to chat server failed. Retrying...')
+        })
+
+        newSocket.on('onlineUsers', (users: string[]) => {
+          if (Array.isArray(users)) {
+            setOnlineUsers(users)
+          }
+        })
+
+        newSocket.on('newMessage', (message: Chat) => {
+          if (!message || !message.senderId) return
+
+          setConversations(prev => {
+            const updatedConversations = prev.map(convo => {
+              if (convo.id === message.connectedId) {
+                return {
+                  ...convo,
+                  lastMessage: {
+                    message: message.message,
+                    createdAt: message.createdAt,
+                    type: message.type
+                  }
                 }
-                return msg
-              })
-            }
-            return [...prev, message]
+              }
+              return convo
+            })
+            return updatedConversations.sort((a, b) => {
+              const timeA = a.lastMessage?.createdAt || a.updatedAt
+              const timeB = b.lastMessage?.createdAt || b.updatedAt
+              return new Date(timeB).getTime() - new Date(timeA).getTime()
+            })
           })
-        }
-      })
 
-      newSocket.on('messageDeleted', (messageId: string) => {
-        setMessages(prev => prev.filter(msg => msg.id !== messageId))
-      })
+          if (message.connectedId === currentConversation) {
+            setMessages(prev => {
+              // Avoid duplicate messages
+              if (prev.find(msg => msg.id === message.id)) {
+                return prev
+              }
+              
+              if (message.senderId === userId) {
+                // Replace temp message with real message
+                let replaced = false
+                const updated = prev.map(msg => {
+                  if (!replaced && msg.id.startsWith('temp-') && 
+                      msg.message === message.message && 
+                      msg.type === message.type) {
+                    replaced = true
+                    return { ...message, status: 'sent' as Chat['status'] }
+                  }
+                  return msg
+                })
+                return replaced ? updated : [...prev, message]
+              }
+              return [...prev, message]
+            })
+          }
+        })
 
-      newSocket.on('userTyping', ({ connectedId, isTyping }: { connectedId: string; isTyping: boolean }) => {
-        if (connectedId === currentConversation) {
-          setIsTyping(isTyping)
-        }
-      })
+        newSocket.on('messageDeleted', (messageId: string) => {
+          setMessages(prev => prev.filter(msg => msg.id !== messageId))
+        })
 
-      setSocket(newSocket)
-      return () => {
+        newSocket.on('messageStatus', ({ messageId, status }: { messageId: string; status: 'delivered' | 'read' }) => {
+          setMessages(prev =>
+            prev.map(msg =>
+              msg.id === messageId ? { ...msg, status } : msg
+            )
+          )
+        })
+
+        newSocket.on('userTyping', ({ connectedId, isTyping }: { connectedId: string; isTyping: boolean }) => {
+          if (connectedId === currentConversation) {
+            setIsTyping(isTyping)
+          }
+        })
+
+        newSocket.on('messageError', ({ error }: { error: string }) => {
+          setError(error)
+          setTimeout(() => setError(null), 5000)
+        })
+
+        setSocket(newSocket)
+        return newSocket
+      } catch (error) {
+        console.error("Socket connection error:", error)
+        setError("Failed to connect to chat server")
+        return null
+      }
+    }
+
+    const newSocket = connectSocket()
+    
+    return () => {
+      if (newSocket) {
         newSocket.disconnect()
       }
-    } catch (error) {
-      console.error("Socket connection error:", error)
-      setError("Failed to connect to chat server")
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
     }
   }, [userId, currentConversation])
 
-  // Fetch conversations
+  // Fetch conversations with improved error handling
   useEffect(() => {
     if (!userId) {
       setError('User not found. Please log in again.')
@@ -193,7 +252,7 @@ export const useChat = () => {
     return () => clearInterval(intervalId)
   }, [userId, currentConversation])
 
-  // Fetch messages
+  // Fetch messages for current conversation
   useEffect(() => {
     if (!currentConversation || !socket) return
 
@@ -232,9 +291,12 @@ export const useChat = () => {
     if (!currentConversation || isSendingRef.current) return
 
     isSendingRef.current = true
+    setIsUploading(true)
+    
     const currentConvo = conversations.find(c => c.id === currentConversation)
     if (!currentConvo) {
       isSendingRef.current = false
+      setIsUploading(false)
       return
     }
 
@@ -243,6 +305,7 @@ export const useChat = () => {
     formData.append('image', file)
 
     const tempId = `temp-${Date.now()}`
+    
     try {
       const tempMessage: Chat = {
         id: tempId,
@@ -259,15 +322,20 @@ export const useChat = () => {
       setMessages(prev => [...prev, tempMessage])
       setImageFile(null)
 
-      const response = await api.post<{ url: string }>('/chat/upload-image', formData)
+      const response = await api.post<{ url: string }>('/chat/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       const imageUrl = response.data.url
 
       if (socket) {
-        socket.emit('sendMessage', { ...tempMessage, message: imageUrl }, (response: { success: boolean; message: Chat }) => {
-          if (response.success) {
+        socket.emit('sendMessage', { 
+          ...tempMessage, 
+          message: imageUrl 
+        }, (response: { success: boolean; message?: Chat; error?: string }) => {
+          if (response.success && response.message) {
             setMessages(prev =>
               prev.map(msg =>
-                msg.id === tempId ? { ...response.message, status: 'sent' } : msg
+                msg.id === tempId ? { ...response.message!, status: 'sent' } : msg
               )
             )
           } else {
@@ -276,7 +344,7 @@ export const useChat = () => {
                 msg.id === tempId ? { ...msg, status: 'error' } : msg
               )
             )
-            setError('Failed to send image')
+            setError(response.error || 'Failed to send image')
           }
         })
       }
@@ -286,6 +354,7 @@ export const useChat = () => {
       setError('Failed to upload image')
     } finally {
       isSendingRef.current = false
+      setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
@@ -336,11 +405,11 @@ export const useChat = () => {
       )
 
       if (socket) {
-        socket.emit('sendMessage', tempMessage, (response: { success: boolean; message: Chat }) => {
-          if (response.success) {
+        socket.emit('sendMessage', tempMessage, (response: { success: boolean; message?: Chat; error?: string }) => {
+          if (response.success && response.message) {
             setMessages(prev =>
               prev.map(msg =>
-                msg.id === tempId ? { ...response.message, status: 'sent' } : msg
+                msg.id === tempId ? { ...response.message!, status: 'sent' } : msg
               )
             )
           } else {
@@ -349,7 +418,7 @@ export const useChat = () => {
                 msg.id === tempId ? { ...msg, status: 'error' } : msg
               )
             )
-            setError('Failed to send message')
+            setError(response.error || 'Failed to send message')
           }
         })
       }
@@ -373,11 +442,11 @@ export const useChat = () => {
       )
     )
 
-    socket.emit('sendMessage', message, (response: { success: boolean; message: Chat }) => {
-      if (response.success) {
+    socket.emit('sendMessage', message, (response: { success: boolean; message?: Chat; error?: string }) => {
+      if (response.success && response.message) {
         setMessages(prev =>
           prev.map(msg =>
-            msg.id === tempId ? { ...response.message, status: 'sent' } : msg
+            msg.id === tempId ? { ...response.message!, status: 'sent' } : msg
           )
         )
       } else {
@@ -386,7 +455,7 @@ export const useChat = () => {
             msg.id === tempId ? { ...msg, status: 'error' } : msg
           )
         )
-        setError('Failed to retry message')
+        setError(response.error || 'Failed to retry message')
       }
     })
   }
@@ -439,23 +508,6 @@ export const useChat = () => {
     setMessages([])
     setMessageSearchTerm('')
   }
-
-  // Message status updates
-  useEffect(() => {
-    if (!socket) return
-
-    socket.on('messageStatus', ({ messageId, status }: { messageId: string; status: 'delivered' | 'read' }) => {
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === messageId ? { ...msg, status } : msg
-        )
-      )
-    })
-
-    return () => {
-      socket.off('messageStatus')
-    }
-  }, [socket])
 
   // Mark messages as read
   useEffect(() => {
@@ -540,6 +592,7 @@ export const useChat = () => {
     socket,
     onlineUsers,
     imageFile,
+    isUploading,
     chatEndRef,
     inputRef,
     fileInputRef,
