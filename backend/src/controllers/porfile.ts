@@ -179,11 +179,29 @@ export const getTutors = async (_: Request, res: Response) => {
     }
   })
 
-  const user = users.map(user => {
+  interface Rating {
+    rating: number;
+  }
+
+  interface TutorUser {
+    id: string;
+    name: string;
+    skills: string | null;
+    profileImage: string | null;
+    role: string;
+    RatingTo: Rating[];
+  }
+
+  interface TutorUserWithRatings extends Omit<TutorUser, 'RatingTo'> {
+    totalRatings: number;
+    averageRating: number;
+  }
+
+  const user: TutorUserWithRatings[] = users.map((user: TutorUser): TutorUserWithRatings => {
     // Calculate ratings first
-    const totalRatings = user.RatingTo.length;
-    const averageRating = user.RatingTo.length > 0 
-      ? user.RatingTo.reduce((acc, curr) => acc + curr.rating, 0) / user.RatingTo.length 
+    const totalRatings: number = user.RatingTo.length;
+    const averageRating: number = user.RatingTo.length > 0 
+      ? user.RatingTo.reduce((acc: number, curr: Rating) => acc + curr.rating, 0) / user.RatingTo.length 
       : 0;
 
     const { RatingTo, ...userWithoutRating } = user;
@@ -193,7 +211,7 @@ export const getTutors = async (_: Request, res: Response) => {
       totalRatings,
       averageRating
     };
-  })
+  });
 
   console.log(user)
   if (!user) {
