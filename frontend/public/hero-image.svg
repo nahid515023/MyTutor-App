@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Background Elements -->
+  <rect width="800" height="600" fill="#f0f9ff" opacity="0.3"/>
+  <circle cx="650" cy="100" r="50" fill="#3b82f6" opacity="0.1"/>
+  <circle cx="100" cy="500" r="80" fill="#3b82f6" opacity="0.1"/>
+  
+  <!-- Decorative Elements -->
+  <path d="M700,300 Q600,100 400,200 Q200,300 100,200" stroke="#3b82f6" stroke-width="2" fill="none" opacity="0.2"/>
+  <path d="M750,400 Q600,500 400,400 Q200,300 50,400" stroke="#3b82f6" stroke-width="2" fill="none" opacity="0.2"/>
+  
+  <!-- Laptop/Screen -->
+  <rect x="300" y="200" width="240" height="160" rx="8" fill="#1e40af"/>
+  <rect x="310" y="210" width="220" height="130" fill="#bfdbfe"/>
+  <path d="M260,360 L580,360 L600,400 L240,400 Z" fill="#1e40af"/>
+  
+  <!-- Person on Left -->
+  <circle cx="220" cy="280" r="35" fill="#f97316"/> <!-- Head -->
+  <path d="M220,315 L220,380" stroke="#334155" stroke-width="12" stroke-linecap="round"/> <!-- Body -->
+  <path d="M220,330 L180,360" stroke="#334155" stroke-width="8" stroke-linecap="round"/> <!-- Left Arm -->
+  <path d="M220,330 L250,370" stroke="#334155" stroke-width="8" stroke-linecap="round"/> <!-- Right Arm -->
+  
+  <!-- Person on Right -->
+  <circle cx="635" cy="280" r="35" fill="#8b5cf6"/> <!-- Head -->
+  <path d="M635,315 L635,380" stroke="#334155" stroke-width="12" stroke-linecap="round"/> <!-- Body -->
+  <path d="M635,330 L605,370" stroke="#334155" stroke-width="8" stroke-linecap="round"/> <!-- Left Arm -->
+  <path d="M635,330 L675,360" stroke="#334155" stroke-width="8" stroke-linecap="round"/> <!-- Right Arm -->
+  
+  <!-- Books -->
+  <rect x="140" y="400" width="60" height="15" fill="#ef4444"/>
+  <rect x="150" y="385" width="60" height="15" fill="#f59e0b"/>
+  <rect x="160" y="370" width="60" height="15" fill="#10b981"/>
+  
+  <!-- Graduation Cap -->
+  <rect x="600" y="400" width="70" height="10" fill="#1e3a8a"/>
+  <polygon points="635,370 670,390 600,390 635,370" fill="#1e3a8a"/>
+  <circle cx="635" cy="370" r="5" fill="#1e3a8a"/>
+  <line x1="635" y1="370" x2="670" y2="340" stroke="#1e3a8a" stroke-width="2"/>
+  <rect x="660" y="330" width="20" height="20" fill="#1e3a8a"/>
+  
+  <!-- Math Symbols -->
+  <text x="340" y="250" font-family="Arial" font-size="20" fill="#3b82f6">f(x) = ax² + bx + c</text>
+  <text x="350" y="280" font-family="Arial" font-size="15" fill="#3b82f6">∫ 2x dx = x² + C</text>
+  <text x="340" y="310" font-family="Arial" font-size="18" fill="#3b82f6">E = mc²</text>
+  
+  <!-- Speech Bubbles -->
+  <path d="M270,220 Q280,200 300,220 L330,220 Q350,220 340,200 L320,170 Q310,150 290,170 L260,170 Q240,170 250,190 Z" fill="white" stroke="#3b82f6" stroke-width="2"/>
+  <text x="285" y="195" font-family="Arial" font-size="12" fill="#3b82f6">Need help!</text>
+  
+  <path d="M540,220 Q530,200 510,220 L480,220 Q460,220 470,200 L490,170 Q500,150 520,170 L550,170 Q570,170 560,190 Z" fill="white" stroke="#3b82f6" stroke-width="2"/>
+  <text x="495" y="195" font-family="Arial" font-size="12" fill="#3b82f6">I can explain!</text>
+</svg>

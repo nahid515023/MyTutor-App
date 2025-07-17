@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="white"/>
+  
+  <!-- Decorative shapes -->
+  <circle cx="150" cy="100" r="80" fill="#bfdbfe"/>
+  <circle cx="650" cy="500" r="100" fill="#dbeafe"/>
+  <rect x="500" y="50" width="150" height="150" rx="20" fill="#eff6ff"/>
+  <rect x="100" y="400" width="120" height="120" rx="20" fill="#f0f9ff"/>
+  
+  <!-- Teacher figure -->
+  <circle cx="250" cy="250" r="60" fill="#3b82f6"/>
+  <rect x="220" y="310" width="60" height="120" rx="10" fill="#3b82f6"/>
+  <rect x="160" y="340" width="60" height="15" rx="5" fill="#3b82f6"/>
+  <rect x="280" y="340" width="60" height="15" rx="5" fill="#3b82f6"/>
+  
+  <!-- Student figure -->
+  <circle cx="550" cy="280" r="50" fill="#93c5fd"/>
+  <rect x="525" y="330" width="50" height="100" rx="10" fill="#93c5fd"/>
+  <rect x="475" y="350" width="50" height="15" rx="5" fill="#93c5fd"/>
+  <rect x="575" y="350" width="50" height="15" rx="5" fill="#93c5fd"/>
+  
+  <!-- Connection between teacher and student -->
+  <path d="M320,250 C400,200 450,300 500,280" stroke="#3b82f6" stroke-width="5" stroke-dasharray="10,10" fill="none"/>
+  
+  <!-- Digital screen/board -->
+  <rect x="350" y="150" width="120" height="80" rx="5" fill="#1e40af"/>
+  <rect x="360" y="160" width="100" height="60" fill="white"/>
+  <line x1="380" y1="180" x2="440" y2="180" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="380" y1="200" x2="420" y2="200" stroke="#3b82f6" stroke-width="2"/>
+  
+  <!-- Books -->
+  <rect x="400" y="350" width="80" height="15" fill="#ef4444"/>
+  <rect x="410" y="335" width="80" height="15" fill="#f59e0b"/>
+  <rect x="420" y="320" width="80" height="15" fill="#10b981"/>
+  
+  <!-- Graduation cap -->
+  <polygon points="150,450 200,450 175,430" fill="#1e3a8a"/>
+  <rect x="140" y="450" width="70" height="10" fill="#1e3a8a"/>
+  
+  <!-- Math symbols -->
+  <text x="600" y="150" font-family="Arial" font-size="20" font-weight="bold" fill="#3b82f6">A+</text>
+  <text x="150" y="150" font-family="Arial" font-size="20" font-weight="bold" fill="#3b82f6">∑</text>
+  
+  <!-- Title -->
+  <text x="400" y="550" font-family="Arial" font-size="30" font-weight="bold" text-anchor="middle" fill="#1e40af">MyTutor</text>
+  <text x="400" y="580" font-family="Arial" font-size="18" text-anchor="middle" fill="#3b82f6">Your path to excellence</text>
+</svg>
