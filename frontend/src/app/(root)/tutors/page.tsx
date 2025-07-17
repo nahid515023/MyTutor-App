@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { api } from '@/_lib/api'
 import Cookies from 'js-cookie'
 import { showToast } from '@/utils/toastService'
+import { getProfileImageUrl } from '@/utils/getProfileImage'
 
 interface Tutor {
   id: number
