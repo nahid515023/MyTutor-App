@@ -562,18 +562,82 @@ export const getPlatformAnalytics = async (
       })
     ])
 
-    const analytics = {
-      userGrowth,
-      postGrowth,
-      paymentGrowth,
-      monthlyRevenue: monthlyRevenue._sum.amount || 0,
-      topRatedTeachers: topRatedTeachers.map(teacher => ({
-        ...teacher,
-        averageRating: teacher.RatingTo.length > 0 
-          ? teacher.RatingTo.reduce((sum, rating) => sum + rating.rating, 0) / teacher.RatingTo.length
-          : 0
+    interface UserGrowth {
+      role: string
+      _count: { id: number }
+    }
+
+    interface TopRatedTeacher {
+      id: string
+      name: string
+      email: string
+      role: string
+      status: string
+      verified: boolean
+      createdAt: Date
+      updatedAt: Date
+      profileImage: string | null
+      phone: string | null
+      location: string | null
+      RatingTo: { rating: number }[]
+      averageRating?: number
+    }
+
+    interface MostActiveSubject {
+      subject: string
+      _count: { id: number }
+    }
+
+    interface Analytics {
+      userGrowth: UserGrowth[]
+      postGrowth: number
+      paymentGrowth: number
+      monthlyRevenue: number
+      topRatedTeachers: TopRatedTeacher[]
+      mostActiveSubjects: MostActiveSubject[]
+    }
+
+    interface MonthlyRevenue {
+      _sum: {
+      amount: number | null
+      }
+    }
+
+    interface Rating {
+      rating: number
+    }
+
+    interface Teacher {
+      id: string
+      name: string
+      email: string
+      role: string
+      status: string | null
+      verified: boolean
+      createdAt: Date
+      updatedAt: Date
+      profileImage: string | null
+      phone: string | null
+      location: string | null
+      RatingTo: Rating[]
+      averageRating?: number
+    }
+
+    const analytics: Analytics = {
+      userGrowth: userGrowth as UserGrowth[],
+      postGrowth: postGrowth as number,
+      paymentGrowth: paymentGrowth as number,
+      monthlyRevenue: (monthlyRevenue as MonthlyRevenue)._sum.amount || 0,
+      topRatedTeachers: (topRatedTeachers as Teacher[]).map((teacher: Teacher) => ({
+      ...teacher,
+      status: teacher.status ?? '',
+      averageRating:
+        teacher.RatingTo.length > 0
+        ? teacher.RatingTo.reduce((sum: number, rating: Rating) => sum + rating.rating, 0) /
+          teacher.RatingTo.length
+        : 0
       })),
-      mostActiveSubjects
+      mostActiveSubjects: mostActiveSubjects as MostActiveSubject[]
     }
 
     res.json({
