@@ -34,8 +34,7 @@ import {
   ArrowLeft,
   Receipt,
   DollarSign,
-  FileText,
-  RefreshCw
+  FileText
 } from 'lucide-react'
 import { api } from '@/_lib/api'
 import { useAuth } from '@/context/AuthProvider'
