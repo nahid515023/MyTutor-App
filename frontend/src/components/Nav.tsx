@@ -279,6 +279,7 @@ export default function Nav () {
                 { href: '/tutors', label: 'Tutors' },
                 { href: '/meeting', label: 'Meeting' },
                 { href: '/chats', label: 'Chats' },
+                { href: '/payment-history', label: 'Payment History' },
                 ...(user?.role !== 'TEACHER'
                   ? [{ href: '/create-post', label: 'Create Post' }]
                   : [])
@@ -428,6 +429,7 @@ export default function Nav () {
               { href: '/tutors', label: 'Tutors' },
               { href: '/meeting', label: 'Meeting' },
               { href: '/chats', label: 'Chats' },
+              { href: '/payment-history', label: 'Payment History' },
               ...(user?.role !== 'TEACHER'
                 ? [{ href: '/create-post', label: 'Create Post' }]
                 : [])

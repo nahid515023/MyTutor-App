@@ -682,11 +682,7 @@ export default function PostPage() {
                           <div className='w-16 h-16 rounded-full overflow-hidden ring-2 ring-blue-400 dark:ring-blue-500 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-750'>
                             <Image
                               src={
-                                request.User?.profileImage.startsWith('http')
-                                  ? request.User?.profileImage
-                                  : `${process.env.NEXT_PUBLIC_API_URL_IMAGE}${
-                                      request.User?.profileImage || ''
-                                    }`
+                                getProfileImageUrl(request.User?.profileImage || '')
                               }
                               alt={request.User?.name || 'Profile Image'}
                               width={64}

@@ -35,13 +35,23 @@ const allowedOrigins = NODE_ENV === 'production'
       'https://mytutor-mx8r.onrender.com',
       'https://mytutor-frontend.onrender.com'
     ].filter((url): url is string => Boolean(url))
-  : ['http://localhost:3000', 'http://localhost:3001'];
+  : [
+      'http://localhost:3000', 
+      'http://localhost:3001', 
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001'
+    ];
 
 // CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, curl requests, or same-origin)
     if (!origin) return callback(null, true);
+    
+    // In development, be more permissive
+    if (NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -51,9 +61,19 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Cache-Control',
+    'X-File-Name'
+  ],
   exposedHeaders: ['Set-Cookie'],
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 }));
 
 // Session configuration
@@ -86,6 +106,15 @@ app.use(sessionMiddleware);
 
 // Static files
 app.use(express.static('uploads'));
+
+// Handle preflight OPTIONS requests explicitly
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,Cache-Control,X-File-Name');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
 // Health check endpoint
 app.get('/health', healthCheck);

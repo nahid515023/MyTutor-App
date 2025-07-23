@@ -1,7 +1,17 @@
 import { Router } from 'express'
 import { authMiddleware } from '../middlewares/auth'
+import cors from 'cors'
 
 const paymentRouter: Router = Router()
+
+// Add specific CORS for payment routes
+paymentRouter.use(cors({
+  origin: true, // Allow all origins for payment routes in development
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+}))
+
 import { 
   createPayment, 
   successPayment, 
