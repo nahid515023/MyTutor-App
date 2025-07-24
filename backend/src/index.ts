@@ -154,24 +154,17 @@ io.on('connection', (socket) => {
           senderId: message.senderId,
           receiverId: message.receiverId,
           message: message.message,
-          connectedId: message.connectedId,
-          type: message.type || 'text',
-          status: 'sent'
+          connectedId: message.connectedId
         }
       });
 
       // Emit to all users in the conversation
       io.to(message.connectedId).emit('newMessage', newMessage);
-      
+
       // Send delivery status to sender
       const receiverSocketId = onlineUsers.get(message.receiverId);
       if (receiverSocketId) {
-        // Mark as delivered if receiver is online
-        await prisma.chat.update({
-          where: { id: newMessage.id },
-          data: { status: 'delivered' }
-        });
-        
+        // No status update, just emit delivery event
         io.to(receiverSocketId).emit('messageStatus', {
           messageId: newMessage.id,
           status: 'delivered'
@@ -182,11 +175,11 @@ io.on('connection', (socket) => {
       if (callback) {
         callback({ success: true, message: newMessage });
       }
-      
-      logger.debug('Message sent', { 
+
+      logger.debug('Message sent', {
         messageId: newMessage.id,
-        senderId: message.senderId, 
-        receiverId: message.receiverId 
+        senderId: message.senderId,
+        receiverId: message.receiverId
       });
     } catch (error) {
       logger.error('Error saving message:', error);
@@ -210,20 +203,12 @@ io.on('connection', (socket) => {
 
   socket.on('markAsRead', async ({ messageIds, connectedId }) => {
     try {
-      await prisma.chat.updateMany({
-        where: {
-          id: { in: messageIds },
-          receiverId: userId
-        },
-        data: { status: 'read' }
-      });
-
-      // Notify sender about read status
+      // No status update, just notify sender about read status
       for (const messageId of messageIds) {
         const message = await prisma.chat.findUnique({
           where: { id: messageId }
         });
-        
+
         if (message) {
           const senderSocketId = onlineUsers.get(message.senderId);
           if (senderSocketId) {
