@@ -37,25 +37,22 @@ export const adminLogin = async (
 ) => {
   try {
     logger.info('Processing admin login request', { email: req.body.email })
-    
+
     try {
       adminLoginSchema.parse(req.body)
     } catch (error) {
       logger.warn('Admin login failed - invalid input', { error })
       return next(
-        new BadRequestException(
-          'Invalid input data',
-          ErrorCode.INVALID_INPUT
-        )
+        new BadRequestException('Invalid input data', ErrorCode.INVALID_INPUT)
       )
     }
 
     const { email, password } = req.body
 
     const admin = await prisma.user.findFirst({
-      where: { 
-        email, 
-        role: 'ADMIN' 
+      where: {
+        email,
+        role: 'ADMIN'
       }
     })
 
@@ -69,14 +66,20 @@ export const adminLogin = async (
     if (!admin.verified) {
       logger.warn('Admin login failed - admin not verified', { email })
       return next(
-        new UnauthorizedException('Admin account not verified', ErrorCode.USER_NOT_VERIFIED)
+        new UnauthorizedException(
+          'Admin account not verified',
+          ErrorCode.USER_NOT_VERIFIED
+        )
       )
     }
 
     if (admin.status !== 'active') {
       logger.warn('Admin login failed - admin account not active', { email })
       return next(
-        new ForbiddenException('Admin account is not active', ErrorCode.FORBIDDEN)
+        new ForbiddenException(
+          'Admin account is not active',
+          ErrorCode.FORBIDDEN
+        )
       )
     }
 
@@ -89,25 +92,36 @@ export const adminLogin = async (
 
     logger.debug('Generating JWT token for admin', { adminId: admin.id })
     const token = jwt.sign(
-      { userId: admin.id, role: admin.role }, 
-      JWT_SECRET!, 
+      { userId: admin.id, role: admin.role },
+      JWT_SECRET!,
       { expiresIn: '8h' } // Shorter expiry for admin sessions
     )
 
     const maxAge = 8 * 3600 * 1000 // 8 hours
 
     logger.info('Admin login successful', { adminId: admin.id })
-    
+
     // Remove password from response
     const { password: _, ...adminData } = admin
-    
+
     res
-      .cookie('token', JSON.stringify(token), { httpOnly: false, maxAge })
-      .cookie('user', JSON.stringify(adminData), { httpOnly: false, maxAge })
+      .cookie('token', token, {
+        httpOnly: false,
+        maxAge,
+        secure: false, // Always false for localhost
+        sameSite: 'lax',
+        path: '/'
+      })
+      .cookie('user', JSON.stringify(adminData), {
+        httpOnly: false,
+        maxAge,
+        secure: false, // Always false for localhost
+        sameSite: 'lax',
+        path: '/'
+      })
+      .status(200)
       .json({
-        message: 'Admin login successful!',
-        admin: adminData,
-        token
+        message: 'Admin login successful!'
       })
   } catch (error) {
     logger.error('Admin login error', { error })
@@ -123,16 +137,13 @@ export const createAdminUser = async (
 ) => {
   try {
     logger.info('Creating admin user', { email: req.body.email })
-    
+
     try {
       createAdminSchema.parse(req.body)
     } catch (error) {
       logger.warn('Admin creation failed - invalid input', { error })
       return next(
-        new BadRequestException(
-          'Invalid input data',
-          ErrorCode.INVALID_INPUT
-        )
+        new BadRequestException('Invalid input data', ErrorCode.INVALID_INPUT)
       )
     }
 
@@ -145,7 +156,10 @@ export const createAdminUser = async (
 
     if (existingAdmin) {
       return next(
-        new BadRequestException('Admin already exists', ErrorCode.USER_ALREADY_EXISTS)
+        new BadRequestException(
+          'Admin already exists',
+          ErrorCode.USER_ALREADY_EXISTS
+        )
       )
     }
 
@@ -156,7 +170,10 @@ export const createAdminUser = async (
 
     if (adminCount > 0) {
       return next(
-        new ForbiddenException('Admin creation not allowed', ErrorCode.FORBIDDEN)
+        new ForbiddenException(
+          'Admin creation not allowed',
+          ErrorCode.FORBIDDEN
+        )
       )
     }
 
@@ -176,7 +193,7 @@ export const createAdminUser = async (
     logger.info('Admin user created successfully', { adminId: admin.id })
 
     const { password: _, ...adminData } = admin
-    
+
     res.status(201).json({
       message: 'Admin user created successfully',
       admin: adminData
@@ -368,7 +385,9 @@ export const getUserById = async (
     })
 
     if (!user) {
-      return next(new NotFoundException('User not found', ErrorCode.USER_NOT_FOUND))
+      return next(
+        new NotFoundException('User not found', ErrorCode.USER_NOT_FOUND)
+      )
     }
 
     const { password: _, ...userData } = user
@@ -391,7 +410,7 @@ export const updateUserStatus = async (
 ) => {
   try {
     const { id } = req.params
-    
+
     try {
       updateUserStatusSchema.parse(req.body)
     } catch (error) {
@@ -407,13 +426,18 @@ export const updateUserStatus = async (
     })
 
     if (!user) {
-      return next(new NotFoundException('User not found', ErrorCode.USER_NOT_FOUND))
+      return next(
+        new NotFoundException('User not found', ErrorCode.USER_NOT_FOUND)
+      )
     }
 
     // Prevent admin from changing their own status
     if (user.role === 'ADMIN' && user.id === req.user?.id) {
       return next(
-        new ForbiddenException('Cannot change your own status', ErrorCode.FORBIDDEN)
+        new ForbiddenException(
+          'Cannot change your own status',
+          ErrorCode.FORBIDDEN
+        )
       )
     }
 
@@ -430,7 +454,11 @@ export const updateUserStatus = async (
       }
     })
 
-    logger.info('User status updated', { userId: id, newStatus: status, updatedBy: req.user?.id })
+    logger.info('User status updated', {
+      userId: id,
+      newStatus: status,
+      updatedBy: req.user?.id
+    })
 
     res.json({
       message: 'User status updated successfully',
@@ -456,13 +484,18 @@ export const deleteUser = async (
     })
 
     if (!user) {
-      return next(new NotFoundException('User not found', ErrorCode.USER_NOT_FOUND))
+      return next(
+        new NotFoundException('User not found', ErrorCode.USER_NOT_FOUND)
+      )
     }
 
     // Prevent admin from deleting themselves
     if (user.id === req.user?.id) {
       return next(
-        new ForbiddenException('Cannot delete your own account', ErrorCode.FORBIDDEN)
+        new ForbiddenException(
+          'Cannot delete your own account',
+          ErrorCode.FORBIDDEN
+        )
       )
     }
 
@@ -599,7 +632,7 @@ export const getPlatformAnalytics = async (
 
     interface MonthlyRevenue {
       _sum: {
-      amount: number | null
+        amount: number | null
       }
     }
 
@@ -628,15 +661,19 @@ export const getPlatformAnalytics = async (
       postGrowth: postGrowth as number,
       paymentGrowth: paymentGrowth as number,
       monthlyRevenue: (monthlyRevenue as MonthlyRevenue)._sum.amount || 0,
-      topRatedTeachers: (topRatedTeachers as Teacher[]).map((teacher: Teacher) => ({
-      ...teacher,
-      status: teacher.status ?? '',
-      averageRating:
-        teacher.RatingTo.length > 0
-        ? teacher.RatingTo.reduce((sum: number, rating: Rating) => sum + rating.rating, 0) /
-          teacher.RatingTo.length
-        : 0
-      })),
+      topRatedTeachers: (topRatedTeachers as Teacher[]).map(
+        (teacher: Teacher) => ({
+          ...teacher,
+          status: teacher.status ?? '',
+          averageRating:
+            teacher.RatingTo.length > 0
+              ? teacher.RatingTo.reduce(
+                  (sum: number, rating: Rating) => sum + rating.rating,
+                  0
+                ) / teacher.RatingTo.length
+              : 0
+        })
+      ),
       mostActiveSubjects: mostActiveSubjects as MostActiveSubject[]
     }
 
@@ -731,14 +768,19 @@ export const deletePost = async (
     })
 
     if (!post) {
-      return next(new NotFoundException('Post not found', ErrorCode.POST_NOT_FOUND))
+      return next(
+        new NotFoundException('Post not found', ErrorCode.POST_NOT_FOUND)
+      )
     }
 
     await prisma.post.delete({
       where: { id }
     })
 
-    logger.info('Post deleted by admin', { postId: id, deletedBy: req.user?.id })
+    logger.info('Post deleted by admin', {
+      postId: id,
+      deletedBy: req.user?.id
+    })
 
     res.json({
       message: 'Post deleted successfully'
@@ -823,8 +865,12 @@ export const getReports = async (
 ) => {
   try {
     const reportType = req.query.type as string
-    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
-    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
+    const startDate = req.query.startDate
+      ? new Date(req.query.startDate as string)
+      : undefined
+    const endDate = req.query.endDate
+      ? new Date(req.query.endDate as string)
+      : undefined
 
     let reportData: any = {}
 
@@ -893,7 +939,12 @@ export const getReports = async (
         break
 
       default:
-        return next(new BadRequestException('Invalid report type', ErrorCode.INVALID_INPUT))
+        return next(
+          new BadRequestException(
+            'Invalid report type',
+            ErrorCode.INVALID_INPUT
+          )
+        )
     }
 
     res.json({

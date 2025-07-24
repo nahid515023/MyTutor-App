@@ -102,14 +102,37 @@ export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
 
+
+
   const fetchAnalytics = async () => {
     try {
       setLoading(true)
+      console.log('Fetching analytics data...')
       const response = await api.get('/dashboard/analytics')
-      setAnalytics(response.data as DashboardAnalytics)
+      console.log('Full response:', response.data)
+      
+      // The backend returns { message: "...", data: analytics }
+      // So we need to access response.data.data to get the actual analytics
+      const responseData = response.data as { message: string; data: DashboardAnalytics }
+      
+      if (responseData && responseData.data) {
+        setAnalytics(responseData.data)
+        console.log('Analytics data set successfully:', responseData.data)
+      } else {
+        console.error('No analytics data found in response')
+        toast.error('No analytics data received')
+      }
     } catch (error) {
-      toast.error('Failed to fetch dashboard analytics')
       console.error('Error fetching analytics:', error)
+      const axiosError = error as { response?: { status: number; data?: { error: string } } }
+      
+      if (axiosError.response?.status === 401) {
+        toast.error('Authentication required. Please log in.')
+      } else if (axiosError.response?.status === 403) {
+        toast.error('Access denied. Admin privileges required.')
+      } else {
+        toast.error('Failed to fetch dashboard analytics')
+      }
     } finally {
       setLoading(false)
     }
@@ -118,6 +141,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchAnalytics()
   }, [])
+
+  console.log(analytics)
 
   if (loading) {
     return (

@@ -23,7 +23,17 @@ export const prisma = new PrismaClient();
 const logger = createLogger('server');
 
 // Apply security middleware early
-app.use(securityHeaders);
+if (NODE_ENV === 'production') {
+  app.use(securityHeaders);
+} else {
+  // In development, use a minimal security setup
+  app.use((req, res, next) => {
+    // Only set essential headers for development
+    res.setHeader('X-Content-Type-Options', 'nosniff')
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN') // Less restrictive for dev
+    next()
+  });
+}
 app.use(globalLimiter);
 app.use(requestLogger);
 

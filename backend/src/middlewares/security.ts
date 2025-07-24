@@ -17,16 +17,32 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
   // Referrer Policy
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
   
-  // Content Security Policy
-  res.setHeader('Content-Security-Policy', 
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data: https:; " +
-    "font-src 'self'; " +
-    "connect-src 'self' https:; " +
-    "frame-ancestors 'none'"
-  )
+  // Content Security Policy - more permissive for development
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Content-Security-Policy', 
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: https:; " +
+      "font-src 'self'; " +
+      "connect-src 'self' https:; " +
+      "frame-ancestors 'none'"
+    )
+  } else {
+    // Development mode - very permissive CSP
+    res.setHeader('Content-Security-Policy', 
+      "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' localhost:* 127.0.0.1:*; " +
+      "style-src 'self' 'unsafe-inline' data:; " +
+      "img-src 'self' data: blob: https: http: localhost:* 127.0.0.1:*; " +
+      "font-src 'self' data:; " +
+      "connect-src 'self' ws: wss: http: https: localhost:* 127.0.0.1:*; " +
+      "frame-src 'self' localhost:* 127.0.0.1:*; " +
+      "media-src 'self' data: blob:; " +
+      "object-src 'none'; " +
+      "base-uri 'self'"
+    )
+  }
   
   // Permissions Policy
   res.setHeader('Permissions-Policy', 

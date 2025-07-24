@@ -276,17 +276,19 @@ export const login = async (
     
     res
       .status(200)
-      .cookie('token', JSON.stringify(token), { 
+      .cookie('token', token, { 
         httpOnly: false, 
         maxAge,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        secure: false, // Always false for localhost
+        sameSite: 'lax',
+        path: '/'
       })
       .cookie('user', JSON.stringify(safeUser), { 
         httpOnly: false, 
         maxAge,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        secure: false, // Always false for localhost
+        sameSite: 'lax',
+        path: '/'
       })
       .json({
         success: true,
@@ -503,13 +505,15 @@ export const logout = async (
     // Clear cookies with proper options
     res.clearCookie('token', {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+      secure: false, // Always false for localhost
+      sameSite: 'lax',
+      path: '/'
     })
     res.clearCookie('user', {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+      secure: false, // Always false for localhost
+      sameSite: 'lax',
+      path: '/'
     })
 
     // Destroy session if using sessions
@@ -693,13 +697,14 @@ export const emailVerification = async (
     const cookieOptions = {
       httpOnly: false,
       maxAge,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax'
+      secure: false, // Always false for localhost
+      sameSite: 'lax' as const,
+      path: '/'
     }
 
     res
       .status(200)
-      .cookie('token', JSON.stringify(jwt_token), cookieOptions)
+      .cookie('token', jwt_token, cookieOptions)
       .cookie('user', JSON.stringify(user), cookieOptions)
       .json({
         success: true,
@@ -915,13 +920,14 @@ export const googleAuth = async (
       const cookieOptions = {
         httpOnly: false,
         maxAge,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax'
+        secure: false, // Always false for localhost
+        sameSite: 'lax' as const,
+        path: '/'
       }
 
       res
         .status(200)
-        .cookie('token', JSON.stringify(jwt_token), cookieOptions)
+        .cookie('token', jwt_token, cookieOptions)
         .cookie('user', JSON.stringify(user), cookieOptions)
         .json({
           success: true,

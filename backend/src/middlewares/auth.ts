@@ -45,9 +45,12 @@ export async function authMiddleware(
     
     if (req.cookies['token']) {
       try {
+        // Try to parse as JSON first (for backward compatibility)
         token = JSON.parse(req.cookies['token'])
       } catch (error) {
-        logger.warn('Failed to parse token from cookie')
+        // If parsing fails, use the raw value (new format)
+        token = req.cookies['token']
+        logger.debug('Using raw token from cookie')
       }
     }
     

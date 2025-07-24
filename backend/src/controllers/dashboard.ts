@@ -348,6 +348,8 @@ export const resendEmailVerification = async (req: Request, res: Response) => {
 
 // Enhanced dashboard analytics
 export const getDashboardAnalytics = async (req: Request, res: Response) => {
+
+  console.log('Hit the analytics endpoint')
   try {
     // Get total counts
     const totalUsers = await prisma.user.count()
@@ -541,7 +543,7 @@ export const getDashboardAnalytics = async (req: Request, res: Response) => {
       recentActivities
     }
 
-    res.status(200).json(analytics)
+    res.status(200).json({ message: 'Dashboard analytics fetched successfully', data: analytics })
   } catch (error) {
     console.error('Error fetching dashboard analytics:', error)
     res.status(500).json({ error: 'Internal server error' })

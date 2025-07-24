@@ -8,7 +8,6 @@ import {
   googleAuth,
   logout
 } from '../controllers/auth'
-import { loginLimiter, signupLimiter } from '../config/rateLimiters'
 import { errorHandler } from '../error-hander'
 import upload from '../utils/imageUpload'
 import passport from 'passport'
@@ -19,10 +18,9 @@ import { authLimiter } from '../config/rateLimiters'
 const authRoutes: Router = Router()
 
 // Public authentication routes with rate limiting
-authRoutes.post('/login', loginLimiter, errorHandler(login))
+authRoutes.post('/login', errorHandler(login))
 authRoutes.post(
   '/signup',
-  signupLimiter,
   upload.single('profileImage'),
   errorHandler(signup)
 )

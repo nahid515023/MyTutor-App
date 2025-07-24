@@ -17,7 +17,7 @@ export default function AdminHeader() {
   const notifications = 0 // Placeholder for future implementation
 
   useEffect(() => {
-    const userData = localStorage.getItem('adminUser')
+    const userData = getUserData();
     if (userData) {
       setAdminUser(JSON.parse(userData))
     }

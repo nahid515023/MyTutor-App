@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import Cookies from 'js-cookie'
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode
@@ -16,8 +17,8 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('adminToken')
-        const adminUser = localStorage.getItem('adminUser')
+        const token = Cookies.get('token')
+        const adminUser = Cookies.get('user')
 
         if (!token || !adminUser) {
           router.push('/admin/login')
@@ -29,28 +30,11 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
           router.push('/admin/login')
           return
         }
-
-        // Optionally verify token with backend
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}admin/dashboard`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          localStorage.removeItem('adminToken')
-          localStorage.removeItem('adminUser')
-          router.push('/admin/login')
-          return
-        }
-
         setIsAuthorized(true)
       } catch (error) {
         console.error('Auth check failed:', error)
-        localStorage.removeItem('adminToken')
-        localStorage.removeItem('adminUser')
+        Cookies.remove('token')
+        Cookies.remove('user')
         router.push('/admin/login')
       } finally {
         setLoading(false)

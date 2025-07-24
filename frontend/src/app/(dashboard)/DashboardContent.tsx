@@ -13,7 +13,6 @@ export default function DashboardContent({ children }: DashboardContentProps) {
     <div className={`flex flex-col overflow-x-hidden relative z-10 transition-all duration-500 ease-in-out ${
       isCollapsed ? 'ml-20' : 'ml-72'
     }`}>
-      {/* <AdminHeader /> */}
       <main className='flex-1 overflow-auto'>
         {children}
       </main>

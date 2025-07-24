@@ -39,6 +39,6 @@ export default function DashboardLayout ({
           </DashboardContentWrapper>
         </div>
       </SidebarProvider>
-    </AdminProtectedRoute>
+   </AdminProtectedRoute>
   )
 }
