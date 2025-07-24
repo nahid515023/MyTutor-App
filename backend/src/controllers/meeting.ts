@@ -32,6 +32,14 @@ export const createMeeting = async (
       }
     })
 
+    await prisma.post.update({
+      where: {
+        id: req.body.postId
+      },
+      data: {
+        booked: true
+      }
+    })
     res.status(200).json({ message: 'Meeting created successfully!' })
   } catch (error) {
     console.error('Error creating meeting:', error)
@@ -97,6 +105,8 @@ export const deleteMeeting = async (req: Request, res: Response) => {
       where: { postId },
       select: { id: true }
     })
+
+
 
     if (!meeting) {
       return res.status(404).json({ error: 'Meeting not found' })

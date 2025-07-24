@@ -24,6 +24,8 @@ export function requireRole(allowedRoles: string[]) {
       return next(new UnauthorizedException('Authentication required', ErrorCode.UNAUTHORIZED))
     }
 
+    console.log(allowedRoles, req.user.role)
+
     const userRole = req.user.role
     if (!allowedRoles.includes(userRole)) {
       logger.warn(`Access denied for user ${req.user.id} with role ${userRole}. Required roles: ${allowedRoles.join(', ')}`)

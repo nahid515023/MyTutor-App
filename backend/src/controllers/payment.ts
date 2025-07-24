@@ -276,8 +276,22 @@ export const getPaymentHistory = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.params.userId
+    console.log('Payment history request received:', {
+      params: req.params,
+      query: req.query,
+      origin: req.headers.origin,
+      method: req.method
+    })
+
+    const {userId} = req.params
     const role = req.query.role as string
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      })
+    }
 
     let payments
 
@@ -340,6 +354,8 @@ export const getPaymentHistory = async (
         }
       })
     }
+
+    console.log('Payment history fetched:', payments.length, 'records')
 
     res.status(200).json({
       success: true,
