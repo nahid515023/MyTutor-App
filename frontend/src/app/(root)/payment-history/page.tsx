@@ -31,7 +31,6 @@ import {
   User,
   GraduationCap,
   CalendarDays,
-  ArrowLeft,
   Receipt,
   DollarSign,
   FileText
@@ -39,7 +38,7 @@ import {
 import { api } from '@/_lib/api'
 import { useAuth } from '@/context/AuthProvider'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+
 
 // Payment interface based on your backend structure
 interface Payment {
@@ -211,12 +210,6 @@ export default function PaymentHistoryPage() {
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-6">
-            <Link href="/dashboard">
-              <Button variant="outline" size="sm" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </Button>
-            </Link>
             <div className="flex items-center gap-3">
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Receipt className="w-6 h-6 text-blue-600" />
