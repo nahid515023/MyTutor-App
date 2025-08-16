@@ -39,8 +39,6 @@ export const ChatArea = ({
   isTyping,
   userId,
   onMessageSearch,
-  onRetryMessage,
-  onDeleteMessage,
   chatEndRef,
   messageContainerRef,
   getCurrentConversationName,
@@ -53,10 +51,10 @@ export const ChatArea = ({
   )
 
   useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
     }
-  }, [messages, chatEndRef]);
+  }, [messages, messageContainerRef]);
 
   return (
     <section className='w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col h-[calc(100vh-16rem)]'>
@@ -118,8 +116,6 @@ export const ChatArea = ({
                 {dateMessages.map((message, index) => {
                   const isFirstInGroup = index === 0 || dateMessages[index - 1].senderId !== message.senderId
                   const isLastInGroup = index === dateMessages.length - 1 || dateMessages[index + 1].senderId !== message.senderId
-                  const canDelete = message.senderId === userId && message.status !== 'error'
-
                   return (
                     <div
                       key={message.id}
@@ -177,22 +173,6 @@ export const ChatArea = ({
                           </div>
                         )}
                       </div>
-                      {message.status === 'error' && (
-                        <button
-                          onClick={() => onRetryMessage(message.id)}
-                          className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 bg-red-500 text-white px-2 py-1 rounded text-xs"
-                        >
-                          Retry
-                        </button>
-                      )}
-                      {canDelete && (
-                        <button
-                          onClick={() => onDeleteMessage(message.id)}
-                          className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 bg-red-500 text-white px-2 py-1 rounded text-xs"
-                        >
-                          Delete
-                        </button>
-                      )}
                     </div>
                   )
                 })}

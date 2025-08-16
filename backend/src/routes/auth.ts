@@ -24,12 +24,11 @@ authRoutes.post(
   upload.single('profileImage'),
   errorHandler(signup)
 )
-authRoutes.post('/google', authLimiter, errorHandler(googleAuth))
-authRoutes.put('/verify', authLimiter, errorHandler(emailVerification))
-authRoutes.post('/forgot-password', authLimiter, errorHandler(forgotPassword))
+authRoutes.post('/google', errorHandler(googleAuth))
+authRoutes.put('/verify', errorHandler(emailVerification))
+authRoutes.post('/forgot-password', errorHandler(forgotPassword))
 authRoutes.post(
   '/reset-password/:ResetToken/:userId',
-  authLimiter,
   errorHandler(resetPassword)
 )
 

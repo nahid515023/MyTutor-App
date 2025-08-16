@@ -1,5 +1,7 @@
 'use client'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
+import { api } from '@/_lib/api'
 import {
   FaStar,
   FaArrowRight,
@@ -11,7 +13,77 @@ import {
   FaVideo
 } from 'react-icons/fa'
 
+interface PublicStatistics {
+  qualifiedTutors: number
+  happyStudents: number
+  successRate: number
+}
+
+interface StatisticsResponse {
+  success: boolean
+  data: PublicStatistics
+}
+
 export const LandingPage = () => {
+  const [statistics, setStatistics] = useState<PublicStatistics>({
+    qualifiedTutors: 5000,
+    happyStudents: 15000,
+    successRate: 98
+  })
+  const [isLoading, setIsLoading] = useState(true)
+  const [animateNumbers, setAnimateNumbers] = useState(false)
+
+  // Fetch statistics from backend
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        setIsLoading(true)
+        const response = await api.get<StatisticsResponse>('/dashboard/public-stats')
+        if (response.data.success) {
+          setStatistics(response.data.data)
+          setAnimateNumbers(true)
+          // Reset animation after 1 second
+          setTimeout(() => setAnimateNumbers(false), 1000)
+        }
+      } catch (error) {
+        console.error('Failed to fetch statistics:', error)
+        // Keep default values if fetch fails - fallback to static numbers
+        setStatistics({
+          qualifiedTutors: 5000,
+          happyStudents: 15000,
+          successRate: 98
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchStatistics()
+
+    // Optionally refresh statistics every 5 minutes
+    const interval = setInterval(fetchStatistics, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  console.log(statistics);
+
+  // Format numbers with K/M suffix
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M'
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(0) + 'K'
+    }
+    return num.toString()
+  }
+
+  // Loading skeleton component
+  const StatisticSkeleton = () => (
+    <div className="text-center group">
+      <div className="h-12 lg:h-16 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-lg animate-pulse mb-2"></div>
+      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-24 mx-auto"></div>
+    </div>
+  )
   return (
     <>
       <header className="relative overflow-hidden py-20 lg:py-32 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800">
@@ -26,7 +98,7 @@ export const LandingPage = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 text-center lg:text-left">
               <div className="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-indigo-900/50 text-blue-700 dark:text-indigo-300 rounded-full text-sm font-medium mb-4 backdrop-blur-sm border border-blue-200 dark:border-indigo-700">
-                🌟 Trusted by 15,000+ students worldwide
+                🌟 Trusted by {formatNumber(statistics.happyStudents)}+ students worldwide
               </div>
               <h1 className="text-5xl lg:text-7xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-indigo-400 dark:via-blue-400 dark:to-purple-400 text-transparent bg-clip-text animate-gradient leading-tight">
                 Find Your Perfect Tutor Today
@@ -45,20 +117,38 @@ export const LandingPage = () => {
                 </button>
               </div>
               <div className="flex items-center justify-center lg:justify-start space-x-8 pt-8">
-                <div className="text-center group">
-                  <div className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-400 dark:to-blue-400 text-transparent bg-clip-text group-hover:scale-110 transition-transform duration-300">5000+</div>
-                  <div className="text-gray-600 dark:text-gray-300 font-medium">Qualified Tutors</div>
-                </div>
-                <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
-                <div className="text-center group">
-                  <div className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 text-transparent bg-clip-text group-hover:scale-110 transition-transform duration-300">15K+</div>
-                  <div className="text-gray-600 dark:text-gray-300 font-medium">Happy Students</div>
-                </div>
-                <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
-                <div className="text-center group">
-                  <div className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 text-transparent bg-clip-text group-hover:scale-110 transition-transform duration-300">98%</div>
-                  <div className="text-gray-600 dark:text-gray-300 font-medium">Success Rate</div>
-                </div>
+                {isLoading ? (
+                  <>
+                    <StatisticSkeleton />
+                    <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+                    <StatisticSkeleton />
+                    <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+                    <StatisticSkeleton />
+                  </>
+                ) : (
+                  <>
+                    <div className="text-center group">
+                      <div className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-400 dark:to-blue-400 text-transparent bg-clip-text group-hover:scale-110 transition-all duration-300 ${animateNumbers ? 'animate-bounce' : ''}`}>
+                        {formatNumber(statistics.qualifiedTutors)}+
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-300 font-medium">Qualified Tutors</div>
+                    </div>
+                    <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+                    <div className="text-center group">
+                      <div className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 text-transparent bg-clip-text group-hover:scale-110 transition-all duration-300 ${animateNumbers ? 'animate-bounce' : ''}`} style={{animationDelay: '100ms'}}>
+                        {formatNumber(statistics.happyStudents)}+
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-300 font-medium">Happy Students</div>
+                    </div>
+                    <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+                    <div className="text-center group">
+                      <div className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 text-transparent bg-clip-text group-hover:scale-110 transition-all duration-300 ${animateNumbers ? 'animate-bounce' : ''}`} style={{animationDelay: '200ms'}}>
+                        {statistics.successRate}%
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-300 font-medium">Success Rate</div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
             <div className="relative group">

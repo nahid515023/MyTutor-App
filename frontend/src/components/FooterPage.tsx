@@ -88,7 +88,7 @@ export function FooterPage() {
               <li className="group flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-all duration-300 ease-in-out">
                 <FaPhone className="mr-3 text-blue-600 dark:text-blue-400 group-hover:text-blue-500 dark:group-hover:text-blue-300 transition-colors duration-300 p-1.5 bg-blue-50 dark:bg-slate-800 rounded-md group-hover:bg-blue-100 dark:group-hover:bg-slate-700" />
                 <span className="group-hover:translate-x-1 transition-transform duration-300">
-                  (555) 123-4567
+                  (+88) 01999-123456
                 </span>
               </li>
               <li className="group flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-all duration-300 ease-in-out">
@@ -100,7 +100,7 @@ export function FooterPage() {
               <li className="group flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-all duration-300 ease-in-out">
                 <FaMapMarkerAlt className="mr-3 text-blue-600 dark:text-blue-400 group-hover:text-blue-500 dark:group-hover:text-blue-300 transition-colors duration-300 p-1.5 bg-blue-50 dark:bg-slate-800 rounded-md group-hover:bg-blue-100 dark:group-hover:bg-slate-700" />
                 <span className="group-hover:translate-x-1 transition-transform duration-300">
-                  123 Learning Avenue, Education City
+                  22, Narinda, Dhaka
                 </span>
               </li>
             </ul>

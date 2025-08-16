@@ -90,5 +90,9 @@ export const pageMetadata = {
   post: {
     title: 'Post | myTutor',
     description: 'Post your requirements'
+  },
+  payment: {
+    title: 'Payment | myTutor',
+    description : 'Make a payment for your session'
   }
 }

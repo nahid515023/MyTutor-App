@@ -47,12 +47,12 @@ const InputField = ({
 }) => (
   <div className='mt-4'>
     <div className='font-semibold text-gray-800 dark:text-gray-200 mb-2 capitalize flex items-center'>
-      <Icon className={`mr-2 ${iconColor}`} />
+      <Icon className={`mr-2 ${iconColor} dark:${iconColor.replace('text-', 'text-').replace('-600', '-400')}`} />
       {placeholder}
     </div>
     <input
       type='text'
-      className='input input-bordered w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-700 dark:text-gray-200 transition-all duration-200'
+      className='input input-bordered w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-700/50 rounded-lg transition-all duration-200'
       value={value}
       onChange={onChange}
       placeholder={`Enter your ${placeholder.toLowerCase()}`}
@@ -95,7 +95,7 @@ export default function AboutComponent({ userData, isUserProfile }: { userData: 
   }
 
   return (
-    <div className='flex flex-col w-full md:w-5/6 lg:w-4/6 mx-auto h-full shadow-lg rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl bg-white dark:bg-gray-900'>
+    <div className='flex flex-col w-full md:w-5/6 lg:w-4/6 mx-auto h-full shadow-lg rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl bg-white dark:bg-gray-800'>
       <div className='container pb-8'>
         <div className='flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-100 to-white dark:from-blue-900/30 dark:to-gray-900'>
           <h2 className='text-gray-800 dark:text-gray-200 text-2xl font-bold flex items-center'>
@@ -201,31 +201,31 @@ export default function AboutComponent({ userData, isUserProfile }: { userData: 
       </div>
 
       <dialog id='about_edit_modal' className='modal'>
-        <div className='modal-box relative p-6 max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl'>
+        <div className='modal-box relative p-6 max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700'>
           <form method='dialog'>
-            <button className='btn btn-sm btn-circle absolute right-4 top-4 bg-red-500 text-white hover:bg-red-600 border-none transition-colors duration-200'>
+            <button className='btn btn-sm btn-circle absolute right-4 top-4 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 border-none transition-all duration-200'>
               ✕
             </button>
           </form>
-          <h3 className='font-bold text-xl text-center text-gray-900 dark:text-gray-100 mb-4'>
+          <h3 className='font-bold text-2xl text-center text-gray-900 dark:text-gray-100 mb-6'>
             Edit Profile
           </h3>
-          <hr className='my-3 border-gray-200 dark:border-gray-700' />
+          <hr className='my-4 border-gray-200 dark:border-gray-700' />
 
-          <div className='space-y-5'>
+          <div className='space-y-6'>
             <div className='flex flex-col'>
-              <div className='font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center'>
+              <div className='font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center'>
                 <FaBookReader className="mr-2 text-blue-600 dark:text-blue-400" />
                 Education
               </div>
               {editData.education?.map((edu, index) => (
                 <div
                   key={index}
-                  className='flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-md mb-2 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors duration-200'
+                  className='flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg mb-3 border border-gray-200 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-sm transition-all duration-200'
                 >
                   <input
                     type='text'
-                    className='input input-bordered input-sm flex-grow bg-transparent dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-700'
+                    className='input input-bordered flex-grow bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-700/50 rounded-lg transition-all duration-200'
                     value={edu}
                     onChange={e => {
                       const updatedEdu = [...editData.education]
@@ -236,7 +236,7 @@ export default function AboutComponent({ userData, isUserProfile }: { userData: 
                   />
                   <button
                     type="button"
-                    className='btn btn-sm btn-ghost text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200'
+                    className='btn btn-sm btn-ghost text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 rounded-lg'
                     onClick={() => handleRemoveItem('education', index)}
                   >
                     <FaTrashAlt />
@@ -245,10 +245,10 @@ export default function AboutComponent({ userData, isUserProfile }: { userData: 
               ))}
               <button
                 type="button"
-                className='btn btn-sm btn-outline btn-primary mt-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-200'
+                className='btn btn-outline border-blue-300 dark:border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 dark:hover:border-blue-500 mt-2 transition-all duration-200 rounded-lg'
                 onClick={() => handleAddItem('education')}
               >
-                <FaPlus className="mr-1" /> Add Education
+                <FaPlus className="mr-2" /> Add Education
               </button>
             </div>
 
@@ -265,18 +265,18 @@ export default function AboutComponent({ userData, isUserProfile }: { userData: 
 
             {isTeacher && (
               <div className='flex flex-col'>
-                <div className='font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center'>
+                <div className='font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center'>
                   <FaBrain className="mr-2 text-indigo-600 dark:text-indigo-400" />
                   Skills
                 </div>
                 {editData.skills?.map((skill, index) => (
                   <div
                     key={index}
-                    className='flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-md mb-2 border border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors duration-200'
+                    className='flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg mb-3 border border-gray-200 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-sm transition-all duration-200'
                   >
                     <input
                       type='text'
-                      className='input input-bordered input-sm flex-grow bg-transparent dark:text-gray-200 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-700'
+                      className='input input-bordered flex-grow bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-700/50 rounded-lg transition-all duration-200'
                       value={skill}
                       onChange={e => {
                         const updatedSkills = [...editData.skills!]
@@ -287,7 +287,7 @@ export default function AboutComponent({ userData, isUserProfile }: { userData: 
                     />
                     <button
                       type="button"
-                      className='btn btn-sm btn-ghost text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200'
+                      className='btn btn-sm btn-ghost text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 rounded-lg'
                       onClick={() => handleRemoveItem('skills', index)}
                     >
                       <FaTrashAlt />
@@ -296,10 +296,10 @@ export default function AboutComponent({ userData, isUserProfile }: { userData: 
                 ))}
                 <button
                   type="button"
-                  className='btn btn-sm btn-outline btn-secondary mt-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors duration-200'
+                  className='btn btn-outline border-indigo-300 dark:border-indigo-600 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:border-indigo-400 dark:hover:border-indigo-500 mt-2 transition-all duration-200 rounded-lg'
                   onClick={() => handleAddItem('skills')}
                 >
-                  <FaPlus className="mr-1" /> Add Skill
+                  <FaPlus className="mr-2" /> Add Skill
                 </button>
               </div>
             )}
@@ -307,7 +307,7 @@ export default function AboutComponent({ userData, isUserProfile }: { userData: 
 
           <button
             type="button"
-            className='btn btn-primary w-full mt-6 text-white hover:bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors duration-200'
+            className='btn btn-primary w-full mt-8 py-3 text-white font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-700 dark:to-blue-800 dark:hover:from-blue-800 dark:hover:to-blue-900 border-none rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]'
             onClick={handleSave}
           >
             Save Changes

@@ -223,26 +223,29 @@ export default function ProfileCard({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl overflow-hidden transform hover:-translate-y-1 transition-all">
-      {/* Cover Photo */}
-      <div className="relative h-64 sm:h-72 md:h-80 overflow-hidden group">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg hover:shadow-xl overflow-hidden transform hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700">
+      {/* Cover Photo - Reduced Height */}
+      <div className="relative h-40 sm:h-48 md:h-52 overflow-hidden group">
         <Image
           src={coverPhoto || '/default-cover.svg'}
           alt={`${localUserData.name}'s cover photo`}
           width={1200}
-          height={400}
+          height={280}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           priority={false}
           onError={() => setCoverPhoto('/default-cover.svg')}
         />
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 dark:to-black/40" />
+        
         {isUserProfile && (
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <label
               htmlFor="coverPhotoInput"
-              className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-blue-600 dark:text-blue-300 px-4 py-2 rounded-lg shadow-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all flex items-center gap-2 transform hover:scale-105 cursor-pointer"
+              className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm text-blue-600 dark:text-blue-400 px-3 py-2 rounded-lg shadow-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all duration-200 flex items-center gap-2 transform hover:scale-105 cursor-pointer text-sm font-medium"
             >
-              <FaCamera className="h-4 w-4" />
-              Change Cover
+              <FaCamera className="h-3 w-3" />
+              Cover
             </label>
             <input
               id="coverPhotoInput"
@@ -256,16 +259,16 @@ export default function ProfileCard({
         )}
       </div>
 
-      {/* Profile Picture */}
-      <div className="relative flex justify-center -mt-24 sm:-mt-28">
+      {/* Profile Picture - Reduced Size */}
+      <div className="relative flex justify-center -mt-16 sm:-mt-18">
         <div className="relative group">
-          <div className="h-40 w-40 rounded-full overflow-hidden border-4 border-white dark:border-gray-700 shadow-xl bg-white dark:bg-gray-800 transform transition-transform duration-500 group-hover:scale-105">
+          <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden border-4 border-white dark:border-gray-700 shadow-xl bg-white dark:bg-gray-800 transform transition-transform duration-300 group-hover:scale-105">
             <Image
               src={profilePic || '/default-avatar.svg'}
               alt={`${localUserData.name}'s profile picture`}
-              width={160}
-              height={160}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              width={128}
+              height={128}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
               priority={true}
               onError={() => setProfilePic('/default-avatar.svg')}
             />
@@ -274,9 +277,9 @@ export default function ProfileCard({
             <>
               <label
                 htmlFor="profilePicInput"
-                className="absolute bottom-1 right-1 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-transform transform hover:scale-110 flex items-center justify-center cursor-pointer"
+                className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 transform hover:scale-110 flex items-center justify-center cursor-pointer border-2 border-gray-200 dark:border-gray-600"
               >
-                <FaCamera className="text-blue-600 dark:text-blue-300 h-5 w-5" />
+                <FaCamera className="text-blue-600 dark:text-blue-400 h-3 w-3" />
               </label>
               <input
                 id="profilePicInput"
@@ -291,8 +294,8 @@ export default function ProfileCard({
         </div>
       </div>
 
-      {/* User Info */}
-      <div className="p-6 text-center">
+      {/* User Info - Improved Spacing */}
+      <div className="p-4 pt-6 text-center">
         {isEditing ? (
           <div className="space-y-4 max-w-lg mx-auto">
             <input
@@ -301,58 +304,71 @@ export default function ProfileCard({
               onChange={(e) => setEditedName(e.target.value)}
               disabled={isLoading}
               maxLength={50}
-              className="w-full px-4 py-3 text-2xl font-bold border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-700 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100"
+              className="w-full px-4 py-3 text-xl font-bold border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-all duration-200"
+              placeholder="Enter your name"
             />
             <textarea
               value={editedBio}
               onChange={(e) => setEditedBio(e.target.value)}
               disabled={isLoading}
               maxLength={500}
-              rows={4}
-              className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-700 resize-none bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100"
+              rows={3}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-all duration-200"
               placeholder="Write something about yourself..."
             />
-            <div className="text-xs text-gray-400 dark:text-gray-400 text-right">
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-right">
               {editedBio.length}/500
             </div>
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-3 pt-2">
               <button
                 onClick={handleSaveProfile}
                 disabled={isLoading}
-                className={`px-6 py-2 rounded-lg font-medium transition-transform transform hover:scale-105 ${
+                className={`px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 transform hover:scale-105 ${
                   isLoading
                     ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 shadow-md hover:shadow-lg'
                 }`}
               >
-                {isLoading ? 'Saving...' : 'Save Changes'}
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Saving...
+                  </span>
+                ) : (
+                  'Save Changes'
+                )}
               </button>
               <button
                 onClick={handleCancelEdit}
                 disabled={isLoading}
-                className="px-6 py-2 rounded-lg font-medium border dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                className="px-5 py-2 rounded-lg font-medium text-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-200 transform hover:scale-105"
               >
                 Cancel
               </button>
             </div>
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
+          <div className="max-w-xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2 leading-tight">
               {localUserData.name}
             </h2>
-            <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed px-4 sm:px-8 lg:px-16">
-              {localUserData.bio ||
-                (isUserProfile
-                  ? 'Add a bio to tell people more about yourself...'
-                  : '')}
-            </p>
+            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 mb-3">
+              {localUserData.role === 'TEACHER' ? '👨‍🏫 Teacher' : '👨‍🎓 Student'}
+            </div>
+            {(localUserData.bio || isUserProfile) && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed px-2 sm:px-4 mb-4">
+                {localUserData.bio ||
+                  (isUserProfile
+                    ? '✨ Add a bio to tell people more about yourself...'
+                    : 'No bio available')}
+              </p>
+            )}
             {isUserProfile && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="mt-6 inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-transform transform hover:scale-105 font-medium"
+                className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 transform hover:scale-105 font-medium text-sm bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40"
               >
-                <FaEdit className="h-4 w-4" />
+                <FaEdit className="h-3 w-3" />
                 Edit Profile
               </button>
             )}

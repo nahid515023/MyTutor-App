@@ -1,6 +1,7 @@
 'use client'
 
 import { Sidebar } from '@/components/Sidebar'
+import AdminHeader from '@/components/admin/AdminHeader'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
 import { SidebarProvider, useSidebar } from '@/contexts/SidebarContext'
 
@@ -25,6 +26,7 @@ export default function DashboardLayout ({
 }) {
   return (
     <AdminProtectedRoute>
+          <AdminHeader />
       <SidebarProvider>
         <div className='flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden'>
           {/* Animated background elements */}

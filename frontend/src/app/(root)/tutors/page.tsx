@@ -299,7 +299,7 @@ export default function TutorsPage () {
             </p>
             <button
               onClick={resetFilters}
-              className='px-8 py-3 bg-gradient-to-r from-blue-500 to-amber-500 dark:from-blue-600 dark:to-amber-600 text-white rounded-xl hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+              className='px-8 py-3 bg-blue-500 text-white rounded-xl hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
             >
               Clear All Filters
             </button>

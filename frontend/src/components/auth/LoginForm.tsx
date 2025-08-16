@@ -52,13 +52,24 @@ export default function LoginForm ({
   
   const { refreshAuth } = useAuth()
 
-  const handleError = (err: { response?: { data: { message: string } }; request?: unknown }) => {
+  const handleError = (err: { response?: { data: { message: string; errorCode?: number } }; request?: unknown }) => {
     if (err.response && err.response.data) {
-      setShowError('Email or Password is incorrect')
-      setIsIncorrectPassword(true)
+      const { message, errorCode } = err.response.data
+      
+      if (errorCode === 1007) {
+        setShowError('Invalid email or password')
+        setIsIncorrectPassword(true)
+        showToast('error', message || 'Invalid credentials!')
+      } else {
+        setShowError(message || 'Login failed')
+        setIsIncorrectPassword(true)
+        showToast('error', message || 'Login failed!')
+      }
     } else if (err.request) {
+      setShowError('No response from server')
       showToast('error', 'No Response from Server!')
     } else {
+      setShowError('An unexpected error occurred')
       showToast('error', 'Unexpected Error!')
     }
   }
@@ -66,8 +77,11 @@ export default function LoginForm ({
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
+    setShowError('') // Clear any previous errors
+    setIsIncorrectPassword(false)
+    
     try {
-      const response = await api.post<{ message: string }>('auth/login', {
+      const response = await api.post<{ message: string; errorCode?: number }>('auth/login', {
         email,
         password,
         role
@@ -75,15 +89,26 @@ export default function LoginForm ({
 
       console.log('Login response:', response.data)
 
-      showToast('success', response.data.message || 'Login Successful!')
-      setIsIncorrectPassword(false)
-      
-      // Refresh auth context to pick up new cookies, then navigate
-      await refreshAuth()
-      router.push('/home')
+      // Check if the response contains an error code
+      if (response.data.errorCode === 1007) {
+        // Handle invalid credentials error
+        setShowError('Invalid email or password')
+        setIsIncorrectPassword(true)
+        showToast('error', response.data.message || 'Invalid credentials!')
+      }else{
+        
+        // Success case
+        showToast('success', response.data.message || 'Login Successful!')
+        setIsIncorrectPassword(false)
+        
+        // Refresh auth context to pick up new cookies, then navigate
+        await refreshAuth()
+        router.push('/home')
+      }
+
       
     } catch (err) {
-      handleError(err as { response?: { data: { message: string } }; request?: unknown })
+      handleError(err as { response?: { data: { message: string; errorCode?: number } }; request?: unknown })
     } finally {
       setIsLoading(false)
     }

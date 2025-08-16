@@ -15,12 +15,10 @@ import {
   Link as LinkIcon,
   Users,
   Video,
-  ArrowLeft,
   Info,
   CheckCircle2,
   Loader2
 } from 'lucide-react'
-import Link from 'next/link'
 
 type Meeting = {
   userId: string
@@ -80,6 +78,53 @@ export default function CreateMeeting() {
     )
   }
 
+  // Function to convert 24-hour format to 12-hour format for display
+  function convertTo12Hour(time24h: string): string {
+    if (!time24h) return ''
+    
+    const [hours, minutes] = time24h.split(':')
+    const hour = parseInt(hours, 10)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    const displayHour = hour % 12 || 12
+    
+    return `${displayHour}:${minutes} ${ampm}`
+  }
+
+  // Function to convert 12-hour format to 24-hour format
+  function convertTo24Hour(time12h: string): string {
+    const trimmedTime = time12h.trim()
+    
+    // If time is already in 24-hour format (no AM/PM), return as is
+    if (!trimmedTime.toLowerCase().includes('am') && !trimmedTime.toLowerCase().includes('pm')) {
+      return trimmedTime
+    }
+
+    // Handle different formats: "2:30 PM", "2:30PM", "14:30", etc.
+    const timeRegex = /^(\d{1,2}):(\d{2})\s*(am|pm)$/i
+    const match = trimmedTime.match(timeRegex)
+    
+    if (!match) {
+      console.warn('Invalid time format:', trimmedTime)
+      return trimmedTime // Return original if can't parse
+    }
+
+    const [, hours, minutes, modifier] = match
+    let hour = parseInt(hours, 10)
+    
+    // Convert to 24-hour format
+    if (modifier.toLowerCase() === 'am') {
+      if (hour === 12) hour = 0
+    } else { // PM
+      if (hour !== 12) hour += 12
+    }
+    
+    // Ensure hours and minutes are two digits
+    const formattedHours = hour.toString().padStart(2, '0')
+    const formattedMinutes = minutes.padStart(2, '0')
+    
+    return `${formattedHours}:${formattedMinutes}`
+  }
+
   useEffect(() => {
     const fetchPostDetails = async () => {
       if (postId) {
@@ -107,9 +152,14 @@ export default function CreateMeeting() {
               if (timeRange.length === 2) {
                 const startTime = timeRange[0].trim()
                 const endTime = timeRange[1].trim()
-                setMeetingStartTime(startTime)
-                setMeetingEndTime(endTime)
-                console.log('Meeting times set - Start:', startTime, 'End:', endTime)
+                
+                // Convert times to 24-hour format if they contain AM/PM
+                const convertedStartTime = convertTo24Hour(startTime)
+                const convertedEndTime = convertTo24Hour(endTime)
+                
+                setMeetingStartTime(convertedStartTime)
+                setMeetingEndTime(convertedEndTime)
+                console.log('Meeting times set - Start:', convertedStartTime, 'End:', convertedEndTime)
               }
             }
           } else {
@@ -172,44 +222,28 @@ export default function CreateMeeting() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 px-4">
-      <div className="container mx-auto max-w-2xl">
-        {/* Header */}
-        <div className="mb-8">
-          <Link href={`/post/${postId}`}>
-            <Button variant="ghost" className="mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Post
-            </Button>
-          </Link>
-          
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Schedule Meeting
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Create a tutoring session with your student
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 py-8 px-4">
+      <div className="container mx-auto max-w-3xl">
 
         {/* Post Info Card */}
         {post.subject && (
-          <Card className="mb-6 border-blue-200 dark:border-blue-800">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                <Users className="w-5 h-5" />
-                Session Details
+          <Card className="mb-8 border-0 shadow-lg bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-blue-700 dark:text-blue-300 text-lg">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Users className="w-5 h-5" />
+                </div>
+                Session Overview
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">{post.subject}</Badge>
-                {post.Class && <Badge variant="outline">Class {post.Class}</Badge>}
-                {post.medium && <Badge variant="outline">{post.medium}</Badge>}
+              <div className="flex flex-wrap gap-2 mb-3">
+                <Badge className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1">{post.subject}</Badge>
+                {post.Class && <Badge variant="outline" className="border-blue-300 text-blue-700 dark:border-blue-600 dark:text-blue-300">Class {post.Class}</Badge>}
+                {post.medium && <Badge variant="outline" className="border-indigo-300 text-indigo-700 dark:border-indigo-600 dark:text-indigo-300">{post.medium}</Badge>}
               </div>
               {post.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2 bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
                   {post.description}
                 </p>
               )}
@@ -218,160 +252,201 @@ export default function CreateMeeting() {
         )}
 
         {/* Main Form Card */}
-        <Card className="shadow-xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-xl">
-            <CardTitle className="flex items-center gap-2">
-              <Video className="w-6 h-6" />
-              Meeting Information
-            </CardTitle>
-            <CardDescription className="text-blue-100">
-              Fill in the details for your tutoring session
-            </CardDescription>
+        <Card className="shadow-2xl border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm"></div>
+            <div className="relative z-10">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                  <Video className="w-6 h-6" />
+                </div>
+                Meeting Information
+              </CardTitle>
+              <CardDescription className="text-blue-100 mt-2">
+                Configure your tutoring session details and preferences
+              </CardDescription>
+            </div>
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-purple-400/10 rounded-full blur-2xl"></div>
           </CardHeader>
           
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-8 space-y-8">
             {/* Meeting Title */}
-            <div className="space-y-2">
-              <Label htmlFor="meetingTitle" className="text-base font-medium">
+            <div className="space-y-3">
+              <Label htmlFor="meetingTitle" className="text-base font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                 Meeting Title *
+                <span className="text-red-500">•</span>
               </Label>
-              <Input
-                id="meetingTitle"
-                type="text"
-                placeholder="Enter a descriptive title for the session"
-                value={meetingTitle}
-                onChange={(e) => setMeetingTitle(e.target.value)}
-                className="h-11"
-              />
-              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                <Info className="w-3 h-3" />
-                A clear title helps identify the meeting purpose
+              <div className="relative group">
+                <Input
+                  id="meetingTitle"
+                  type="text"
+                  placeholder="Enter a descriptive title for the session"
+                  value={meetingTitle}
+                  onChange={(e) => setMeetingTitle(e.target.value)}
+                  className="h-12 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-xl bg-gray-50/50 dark:bg-gray-700/50 focus:bg-white dark:focus:bg-gray-700 shadow-sm focus:shadow-md"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
+                <Info className="w-4 h-4 text-blue-500" />
+                A clear title helps identify the meeting purpose and makes scheduling easier
               </div>
             </div>
 
             {/* Meeting Link */}
-            <div className="space-y-2">
-              <Label htmlFor="meetingLink" className="text-base font-medium">
+            <div className="space-y-3">
+              <Label htmlFor="meetingLink" className="text-base font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                 Meeting Link *
+                <span className="text-red-500">•</span>
               </Label>
-              <div className="relative">
-                <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <div className="relative group">
+                <LinkIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
                 <Input
                   id="meetingLink"
                   type="url"
                   placeholder="https://meet.google.com/... or use generated room"
                   value={meetingLink}
                   onChange={(e) => setMeetingLink(e.target.value)}
-                  className="h-11 pl-10"
+                  className="h-12 pl-12 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-xl bg-gray-50/50 dark:bg-gray-700/50 focus:bg-white dark:focus:bg-gray-700 shadow-sm focus:shadow-md"
                 />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setMeetingLink(generateRandomMeetingLink())}
-                className="text-xs"
+                className="text-sm bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 dark:hover:from-blue-800/30 dark:hover:to-indigo-800/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 transition-all duration-300 hover:scale-105"
               >
-                Generate New Room Link
+                🎲 Generate New Room Link
               </Button>
             </div>
 
             {/* Meeting Date */}
-            <div className="space-y-2">
-              <Label htmlFor="meetingDate" className="text-base font-medium flex items-center gap-2">
+            <div className="space-y-3">
+              <Label htmlFor="meetingDate" className="text-base font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                 Meeting Date *
+                <span className="text-red-500">•</span>
                 {post.preferableDate && (
-                  <Badge variant="secondary" className="text-xs">
-                    Pre-filled from post
+                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-xs border-green-200 dark:border-green-700">
+                    ✓ Pre-filled
                   </Badge>
                 )}
               </Label>
-              <div className="relative">
-                <CalendarDays className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <div className="relative group">
+                <CalendarDays className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
                 <Input
                   id="meetingDate"
                   type="date"
                   value={meetingDate}
                   onChange={(e) => setMeetingDate(e.target.value)}
-                  className="h-11 pl-10"
+                  className="h-12 pl-12 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-xl bg-gray-50/50 dark:bg-gray-700/50 focus:bg-white dark:focus:bg-gray-700 shadow-sm focus:shadow-md"
                   min={new Date().toISOString().split('T')[0]}
                 />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </div>
 
             {/* Meeting Time */}
-            <div className="space-y-2">
-              <Label className="text-base font-medium flex items-center gap-2">
+            <div className="space-y-3">
+              <Label className="text-base font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                 Meeting Time *
+                <span className="text-red-500">•</span>
                 {post.preferableTime && (
-                  <Badge variant="secondary" className="text-xs">
-                    Pre-filled from post
+                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-xs border-green-200 dark:border-green-700">
+                    ✓ Pre-filled
                   </Badge>
                 )}
               </Label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="startTime" className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="startTime" className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Start Time
                   </Label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <div className="relative group">
+                    <Clock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
                     <Input
                       id="startTime"
                       type="time"
                       value={meetingStartTime}
                       onChange={(e) => setMeetingStartTime(e.target.value)}
-                      className="h-11 pl-10"
+                      className="h-12 pl-12 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-xl bg-gray-50/50 dark:bg-gray-700/50 focus:bg-white dark:focus:bg-gray-700 shadow-sm focus:shadow-md"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   </div>
+                  {meetingStartTime && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                      Display: {convertTo12Hour(meetingStartTime)}
+                    </p>
+                  )}
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="endTime" className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="space-y-2">
+                  <Label htmlFor="endTime" className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     End Time
                   </Label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <div className="relative group">
+                    <Clock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
                     <Input
                       id="endTime"
                       type="time"
                       value={meetingEndTime}
                       onChange={(e) => setMeetingEndTime(e.target.value)}
-                      className="h-11 pl-10"
+                      className="h-12 pl-12 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-xl bg-gray-50/50 dark:bg-gray-700/50 focus:bg-white dark:focus:bg-gray-700 shadow-sm focus:shadow-md"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   </div>
+                  {meetingEndTime && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                      Display: {convertTo12Hour(meetingEndTime)}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Submit Button */}
-            <Button
-              onClick={handleCreateMeeting}
-              disabled={isLoading}
-              className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Scheduling Meeting...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Schedule Meeting
-                </>
-              )}
-            </Button>
+            <div className="pt-4">
+              <Button
+                onClick={handleCreateMeeting}
+                disabled={isLoading}
+                className="w-full h-14 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 rounded-xl transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                    Scheduling Meeting...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-5 h-5 mr-3" />
+                    Schedule Meeting
+                  </>
+                )}
+              </Button>
+            </div>
 
             {/* Info Footer */}
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-700 dark:text-blue-300">
-                  <p className="font-medium mb-1">What happens next?</p>
-                  <ul className="space-y-1 text-blue-600 dark:text-blue-400">
-                    <li>• Both you and your student will receive notifications</li>
-                    <li>• The post will be marked as booked</li>
-                    <li>• Meeting details will be saved to your schedule</li>
+            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-blue-200 dark:border-blue-800 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Info className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">What happens next?</h4>
+                  <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                      Both you and your student will receive instant notifications
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                      The post will be automatically marked as booked
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                      Meeting details will be saved to your personal schedule
+                    </li>
                   </ul>
                 </div>
               </div>

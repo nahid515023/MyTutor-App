@@ -127,7 +127,7 @@ Thumbs.db
 *.sqlite3
 
 # Uploads directory (if contains user uploaded files)
-# uploads/
+uploads/
 # Comment out the line above if you want to keep some uploads in version control
 
 # Session files

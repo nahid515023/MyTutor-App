@@ -65,7 +65,7 @@ export default function MyPost (props: {
   }, [props.userData])
 
   return (
-    <div className='flex flex-col w-full mx-auto h-full'>
+    <div className='flex flex-col w-full mx-auto h-full dark:bg-gray-800'>
       <div className='container'>
         <div className='flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/30 dark:to-gray-900 rounded-lg'>
           <h2 className='text-gray-800 dark:text-white text-2xl font-bold flex items-center h-16'>
@@ -82,7 +82,7 @@ export default function MyPost (props: {
             posts.map(post => (
               <div
                 key={post.id}
-                className='bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-l-4 border-blue-500 dark:border-blue-600'
+                className='bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-l-4 border-blue-500 dark:border-blue-600'
               >
                 {/* Header with user info and status */}
                 <div className='flex justify-between items-center p-5 bg-gray-50 dark:bg-gray-900'>

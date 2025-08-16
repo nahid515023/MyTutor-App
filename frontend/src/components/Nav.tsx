@@ -44,7 +44,7 @@ export default function Nav () {
   }, [])
 
   useEffect(() => {
-    document.body.style.paddingTop = '76px'
+    document.body.style.paddingTop = 'var(--navbar-height)'
     return () => {
       document.body.style.paddingTop = '0'
     }
@@ -204,6 +204,10 @@ export default function Nav () {
               width={40}
               height={40}
               className='rounded-full w-10 h-10 object-cover object-center'
+              onError={e => {
+                const target = e.target as HTMLImageElement
+                target.src = APP_CONFIG.DEFAULT_AVATAR
+              }}
             />
           </Link>
         </div>
@@ -279,7 +283,6 @@ export default function Nav () {
                 { href: '/tutors', label: 'Tutors' },
                 { href: '/meeting', label: 'Meeting' },
                 { href: '/chats', label: 'Chats' },
-                { href: '/payment-history', label: 'Payment History' },
                 ...(user?.role !== 'TEACHER'
                   ? [{ href: '/create-post', label: 'Create Post' }]
                   : [])
@@ -311,6 +314,10 @@ export default function Nav () {
                       width={48}
                       height={48}
                       className='h-full w-full rounded-full object-cover'
+                      onError={e => {
+                        const target = e.target as HTMLImageElement
+                        target.src = APP_CONFIG.DEFAULT_AVATAR
+                      }}
                     />
                   </div>
                   <div>
@@ -391,6 +398,27 @@ export default function Nav () {
                     Change Email
                   </Link>
 
+                  <Link
+                    href='/payment-history'
+                    className='flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors'
+                  >
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      className='h-4 w-4 mr-3 text-gray-500 dark:text-gray-500'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'
+                      />
+                    </svg>
+                    Payment history
+                  </Link>
+
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false)
@@ -429,7 +457,6 @@ export default function Nav () {
               { href: '/tutors', label: 'Tutors' },
               { href: '/meeting', label: 'Meeting' },
               { href: '/chats', label: 'Chats' },
-              { href: '/payment-history', label: 'Payment History' },
               ...(user?.role !== 'TEACHER'
                 ? [{ href: '/create-post', label: 'Create Post' }]
                 : [])
@@ -536,6 +563,10 @@ export default function Nav () {
                       width={48}
                       height={48}
                       className='h-full w-full rounded-full object-cover'
+                      onError={e => {
+                        const target = e.target as HTMLImageElement
+                        target.src = APP_CONFIG.DEFAULT_AVATAR
+                      }}
                     />
                   </div>
                   <div>
@@ -610,6 +641,26 @@ export default function Nav () {
                       />
                     </svg>
                     Change email
+                  </Link>
+                  <Link
+                    href='/payment-history'
+                    className='flex px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors items-center group/item'
+                  >
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      className='h-5 w-5 mr-3 text-gray-500 dark:text-gray-500 group-hover:item:text-gray-700 dark:group-hover/item:text-gray-300 transition-colors'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'
+                      />
+                    </svg>
+                    Payment history
                   </Link>
                 </div>
 

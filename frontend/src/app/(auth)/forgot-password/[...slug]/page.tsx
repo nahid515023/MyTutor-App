@@ -2,7 +2,6 @@
 
 import { api } from '@/_lib/api'
 import { showToast } from '@/utils/toastService'
-import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { FooterPage } from '@/components/FooterPage'
@@ -17,6 +16,8 @@ export default function PasswordReset ({
   const [userId, setUserId] = useState('')
   const [resetToken, setResetToken] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const router = useRouter()
 
   const passwordRef = useRef<HTMLInputElement>(null)
@@ -80,7 +81,7 @@ export default function PasswordReset ({
       const data = response.data as { success: boolean; message: string }
 
       if (data.success) {
-        router.push('/signin')
+        router.push('/')
         showToast(
           'success',
           'Your password has been successfully reset. You can now log in with your new password.'
@@ -150,18 +151,37 @@ export default function PasswordReset ({
                 >
                   New Password
                 </label>
-                <input
-                  type='password'
-                  name='password'
-                  id='password'
-                  ref={passwordRef}
-                  className='w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           transition-all duration-300 placeholder-gray-400
-                           hover:border-blue-400'
-                  required
-                  placeholder='Enter your new password'
-                />
+                <div className='relative'>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name='password'
+                    id='password'
+                    ref={passwordRef}
+                    className='w-full px-4 pr-12 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 
+                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             transition-all duration-300 placeholder-gray-400
+                             hover:border-blue-400'
+                    required
+                    placeholder='Enter your new password'
+                  />
+                  <button
+                    type='button'
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowPassword(p => !p)}
+                    className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded transition-all duration-200 p-1'
+                  >
+                  {showPassword ? (
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' className='w-5 h-5'>
+                      <path d='M3.53 2.47a.75.75 0 10-1.06 1.06l2.028 2.028A12.43 12.43 0 001.5 12s3.75 7.5 10.5 7.5a10.94 10.94 0 005.442-1.456l2.028 2.028a.75.75 0 101.06-1.06l-18-18zM12 6.75c1.11 0 2.136.365 2.963.983l-1.093 1.093A3.75 3.75 0 008.82 13.87l-1.1 1.1A6.8 6.8 0 015.4 12c.638-1.12 2.966-5.25 6.6-5.25z' />
+                      <path d='M14.53 10.03l-4.5 4.5A3.75 3.75 0 0014.53 10.03z' />
+                    </svg>
+                  ) : (
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' className='w-5 h-5'>
+                      <path d='M12 4.5C5.25 4.5 1.5 12 1.5 12s3.75 7.5 10.5 7.5S22.5 12 22.5 12 18.75 4.5 12 4.5zm0 12a4.5 4.5 0 110-9 4.5 4.5 0 010 9z' />
+                    </svg>
+                  )}
+                </button>
+                </div>
               </div>
               <div className='transition-all duration-300 hover:transform hover:translate-y-[-2px]'>
                 <label
@@ -170,18 +190,37 @@ export default function PasswordReset ({
                 >
                   Confirm Password
                 </label>
-                <input
-                  type='password'
-                  name='confirm-password'
-                  id='confirm-password'
-                  ref={confirmPasswordRef}
-                  className='w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           transition-all duration-300 placeholder-gray-400
-                           hover:border-blue-400'
-                  required
-                  placeholder='Confirm your new password'
-                />
+                <div className='relative'>
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name='confirm-password'
+                    id='confirm-password'
+                    ref={confirmPasswordRef}
+                    className='w-full px-4 pr-12 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 
+                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             transition-all duration-300 placeholder-gray-400
+                             hover:border-blue-400'
+                    required
+                    placeholder='Confirm your new password'
+                  />
+                  <button
+                    type='button'
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    onClick={() => setShowConfirmPassword(p => !p)}
+                    className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded transition-all duration-200 p-1'
+                  >
+                  {showConfirmPassword ? (
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' className='w-5 h-5'>
+                      <path d='M3.53 2.47a.75.75 0 10-1.06 1.06l2.028 2.028A12.43 12.43 0 001.5 12s3.75 7.5 10.5 7.5a10.94 10.94 0 005.442-1.456l2.028 2.028a.75.75 0 101.06-1.06l-18-18zM12 6.75c1.11 0 2.136.365 2.963.983l-1.093 1.093A3.75 3.75 0 008.82 13.87l-1.1 1.1A6.8 6.8 0 015.4 12c.638-1.12 2.966-5.25 6.6-5.25z' />
+                      <path d='M14.53 10.03l-4.5 4.5A3.75 3.75 0 0014.53 10.03z' />
+                    </svg>
+                  ) : (
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' className='w-5 h-5'>
+                      <path d='M12 4.5C5.25 4.5 1.5 12 1.5 12s3.75 7.5 10.5 7.5S22.5 12 22.5 12 18.75 4.5 12 4.5zm0 12a4.5 4.5 0 110-9 4.5 4.5 0 010 9z' />
+                    </svg>
+                  )}
+                </button>
+                </div>
               </div>
             </div>
 
@@ -211,7 +250,7 @@ export default function PasswordReset ({
             </button>
           </form>
 
-          <div className='mt-6 text-center text-sm'>
+          {/* <div className='mt-6 text-center text-sm'>
             <p className='text-gray-600'>
               Need a new reset link?{' '}
               <Link 
@@ -221,7 +260,7 @@ export default function PasswordReset ({
                 Request here
               </Link>
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -5,9 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { 
   Users,  
-  Settings, 
   BarChart,
-  MessageSquare,
   LogOut,
   FileText,
   CreditCard,
@@ -25,8 +23,8 @@ const menuItems = [
   { title: "Payments", icon: CreditCard, href: "/dashboard/payment" },
   { title: "Meetings", icon: Video, href: "/dashboard/meeting" },
   { title: "Email Verifications", icon: Mail, href: "/dashboard/email-verification" },
-  { title: "Messages", icon: MessageSquare, href: "/dashboard/messages" },
-  { title: "Settings", icon: Settings, href: "/dashboard/settings" },
+  // { title: "Messages", icon: MessageSquare, href: "/dashboard/messages" },
+  // { title: "Settings", icon: Settings, href: "/dashboard/settings" },
 ];
 
 export function Sidebar() {
@@ -65,7 +63,7 @@ export function Sidebar() {
                   MyTutor
                 </h2>
                 <p className="text-xs text-slate-600 dark:text-gray-400 font-medium tracking-wider">
-                  Administration
+                  Admin Dashboard
                 </p>
               </div>
             </div>

@@ -2,13 +2,13 @@ import { API_CONFIG, APP_CONFIG } from "@/config"
 
 export const getProfileImageUrl = (image: string) => {
   // Debug logging only in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('getProfileImageUrl called with:', { 
-      image, 
-      API_CONFIG: API_CONFIG.IMAGE_BASE_URL, 
-      DEFAULT_AVATAR: APP_CONFIG.DEFAULT_AVATAR 
-    });
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.log('getProfileImageUrl called with:', { 
+  //     image, 
+  //     API_CONFIG: API_CONFIG.IMAGE_BASE_URL, 
+  //     DEFAULT_AVATAR: APP_CONFIG.DEFAULT_AVATAR 
+  //   });
+  // }
   
   // If no image provided, use default
   if (!image || image === '' || image === null || image === undefined) {
@@ -31,9 +31,9 @@ export const getProfileImageUrl = (image: string) => {
   // Construct full URL from API base + image path
   const fullUrl = `${baseUrl}${image}`;
   
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Constructed image URL:', fullUrl);
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.log('Constructed image URL:', fullUrl);
+  // }
   
   return fullUrl;
 }

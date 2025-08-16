@@ -2,6 +2,7 @@ import { Router } from 'express'
 import {
   getDashboardData,
   getDashboardAnalytics,
+  getPublicStatistics,
   getUsers,
   deleteUser,
   updateStatus,
@@ -28,6 +29,9 @@ import {
 } from '../middlewares/routeRestriction'
 
 const dashboardRouter: Router = Router()
+
+// Public statistics endpoint (no authentication required)
+dashboardRouter.get('/public-stats', errorHandler(getPublicStatistics))
 
 // All dashboard routes require authentication, verification, and active account
 const baseDashboardRestrictions = combineRestrictions(

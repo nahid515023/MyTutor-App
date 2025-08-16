@@ -1,19 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useGoogleLogin } from '@react-oauth/google'
 import { Button } from '@/components/ui/button'
 import { FcGoogle } from 'react-icons/fc'
 import { showToast } from '@/utils/toastService'
+import { useAuth } from '@/context/AuthProvider'
 
 interface GoogleAuthProps {
   role?: 'STUDENT' | 'TEACHER'
 }
 
 export default function GoogleAuth({ role = 'STUDENT' }: GoogleAuthProps) {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const { refreshAuth } = useAuth()
 
   const login = useGoogleLogin({
     onSuccess: async (response) => {
@@ -38,15 +38,25 @@ export default function GoogleAuth({ role = 'STUDENT' }: GoogleAuthProps) {
         }
 
         showToast('success','Successfully logged in with Google!')
-        router.push('/home')
-        router.refresh()
+        
+        // Refresh auth context to pick up new cookies
+        await refreshAuth()
+        
+        // Wait a moment for the auth context to update, then check if authenticated
+        setTimeout(() => {
+          // Force a page reload to ensure all contexts are updated
+          window.location.href = '/home'
+        }, 200)
+        
       } catch (error) {
+        console.error('Google auth error:', error)
         showToast('error',error instanceof Error ? error.message : 'Authentication failed')
       } finally {
         setIsLoading(false)
       }
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Google login error:', error)
       showToast('error','Google authentication failed')
       setIsLoading(false)
     },

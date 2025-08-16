@@ -686,65 +686,6 @@ const CreatePost = () => {
                       </div>
                     </div>
 
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                      <div className='p-4 bg-green-100/80 dark:bg-green-900/30 rounded-xl border border-green-200 dark:border-green-700'>
-                        <div className='flex items-start space-x-3'>
-                          <div className='flex-shrink-0'>
-                            <svg
-                              className='w-5 h-5 text-green-600 dark:text-green-400 mt-0.5'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                            >
-                              <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                strokeWidth='2'
-                                d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className='text-sm font-medium text-green-700 dark:text-green-300 mb-1'>
-                              💡 Pro Tip
-                            </p>
-                            <p className='text-sm text-green-700 dark:text-green-300'>
-                              Be specific about your learning goals to attract
-                              the perfect tutor for your needs.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className='p-4 bg-blue-100/80 dark:bg-blue-900/30 rounded-xl border border-blue-200 dark:border-blue-700'>
-                        <div className='flex items-start space-x-3'>
-                          <div className='flex-shrink-0'>
-                            <svg
-                              className='w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                            >
-                              <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                strokeWidth='2'
-                                d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className='text-sm font-medium text-blue-700 dark:text-blue-300 mb-1'>
-                              ℹ️ Remember
-                            </p>
-                            <p className='text-sm text-blue-700 dark:text-blue-300'>
-                              Include any materials or resources you already
-                              have access to.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
 

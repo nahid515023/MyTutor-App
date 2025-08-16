@@ -10,13 +10,20 @@ export const createMeeting = async (
 ) => {
   try {
     const convertTimeToDate = (dateStr: string, timeStr: string): Date => {
-      const dateTime = `${dateStr}T${timeStr}:00Z`
-      const fullDate = new Date(dateTime)
-      if (isNaN(fullDate.getTime())) {
+      // Create the datetime string for Bangladesh timezone (UTC+6)
+      const dateTime = `${dateStr}T${timeStr}:00`
+      const localDate = new Date(dateTime)
+      
+      if (isNaN(localDate.getTime())) {
         throw new Error('Invalid date or time format')
       }
-      return fullDate
+      
+      // Subtract 6 hours to convert Bangladesh time to UTC
+      const utcDate = new Date(localDate.getTime() - (6 * 60 * 60 * 1000))
+      console.log(`Converting ${dateTime} (BD) to ${utcDate.toISOString()} (UTC)`)
+      return utcDate
     }
+    console.log('Request body:', req.body)
     const startTime = convertTimeToDate(req.body.date, req.body.start)
     const endTime = convertTimeToDate(req.body.date, req.body.end)
     await prisma.meeting.create({
