@@ -24,13 +24,13 @@ export default function RootLayout({
           {children}
             </GoogleOAuthProvider>
             {/* <AuthDebug /> */}
-            <ToastContainer 
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar
-          newestOnTop
-          closeOnClick
-          rtl={false}
+            <ToastContainer
+              position="bottom-right"
+              autoClose={3000}
+              hideProgressBar
+              newestOnTop
+              closeOnClick
+              rtl={false}
           pauseOnFocusLoss
           draggable
           pauseOnHover

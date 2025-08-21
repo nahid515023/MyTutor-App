@@ -10,6 +10,9 @@ export const allRatingByUser = async (req: Request, res: Response) => {
     },
     include: {
       ratingByUser: true
+    },
+    orderBy: {
+      ratedAt: 'desc'
     }
   })
   res.json({ratings})

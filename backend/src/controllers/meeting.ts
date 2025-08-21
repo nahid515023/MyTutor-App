@@ -97,32 +97,45 @@ export const deleteMeeting = async (req: Request, res: Response) => {
     if (!postId) {
       return res.status(400).json({ error: 'postId is required' })
     }
-
-    await prisma.post.update({
-      where: {
-        id: postId
-      },
-      data: {
-        booked: false
-      }
-    })
-
+    
     // Find the meeting using postId
     const meeting = await prisma.meeting.findFirst({
       where: { postId },
       select: { id: true }
     })
-
-
-
+    
+    
+    
     if (!meeting) {
       return res.status(404).json({ error: 'Meeting not found' })
     }
+    
+        await prisma.post.update({
+          where: {
+            id: postId
+          },
+          data: {
+            booked: false
+          }
+        })
 
     // Delete using the unique id
     await prisma.meeting.delete({
       where: { id: meeting.id }
     })
+
+    // Find the payment first, then update it
+    const payment = await prisma.payment.findFirst({
+      where: { postId },
+      select: { id: true }
+    })
+
+    if (payment) {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'CANCELLED' }
+      })
+    }
 
     return res.status(200).json({ message: 'Meeting deleted successfully' })
   } catch (error) {

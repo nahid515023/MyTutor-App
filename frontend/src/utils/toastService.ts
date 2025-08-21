@@ -2,7 +2,7 @@ import { toast, ToastContent, ToastOptions, Slide, Id } from 'react-toastify'
 
 // Default toast options
 export const defaultToastOptions: ToastOptions = {
-  position: 'top-center',
+  position: 'bottom-right',
   autoClose: 3000,
   hideProgressBar: true,
   closeOnClick: true,

@@ -1,9 +1,12 @@
 'use client'
 import * as React from 'react'
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt'
+import type { ZegoUser } from '@zegocloud/zego-uikit-prebuilt'
 import { useRef, useEffect, useCallback, useState } from 'react'
 import { getUserData } from '@/utils/cookiesUserData'
 import Nav from '@/components/Nav'
+// import plugin
+ import { ZegoSuperBoardManager } from "zego-superboard-web";
 
 // Define user data type for better type safety
 interface UserData {
@@ -48,10 +51,19 @@ export default function MeetingApp ({
   }, [])
 
   const initializeMeeting = useCallback(
-    async (element: HTMLDivElement) => {
+    async (element: HTMLDivElement, retryCount = 0) => {
+      const maxRetries = 3
+      const retryDelay = Math.pow(2, retryCount) * 1000 // Exponential backoff: 1s, 2s, 4s
+      
       try {
         if (!userData?.id || !userData?.name || !roomID) {
           setError('User data or room ID is missing. Please log in.')
+          return
+        }
+
+        // Validate room ID format
+        if (roomID.length < 3 || roomID.length > 64) {
+          setError('Invalid room ID format. Room ID must be between 3 and 64 characters.')
           return
         }
 
@@ -64,6 +76,11 @@ export default function MeetingApp ({
           return
         }
 
+        if (!serverSecret) {
+          setError('Server configuration is missing.')
+          return
+        }
+
         // Generate the token on the client side (for development)
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
           appId,
@@ -73,57 +90,111 @@ export default function MeetingApp ({
           userData.name
         )
 
-        console.log('Token generated successfully for room:', roomID)
+        console.log(`Token generated successfully for room: ${roomID} (attempt ${retryCount + 1})`)
+        console.log('Meeting configuration:', {
+          appId,
+          roomID,
+          userId: userData.id,
+          userName: userData.name,
+          hasServerSecret: !!serverSecret
+        })
 
         // Create instance object from Kit Token.
         const zp = ZegoUIKitPrebuilt.create(kitToken)
         zpInstanceRef.current = zp
 
-        // start the call
-        await zp.joinRoom({
-          container: element,
-          sharedLinks: [
-            {
-              name: 'Personal link',
-              url: window.location.href
-            }
-          ],
-          scenario: {
-            mode: ZegoUIKitPrebuilt.VideoConference,
-            config: {
-              role: ZegoUIKitPrebuilt.Host,
-            }
-          },
-          showScreenSharingButton: true,
-          showLayoutButton: true,
-          maxUsers: 50,
-          // Video configuration to handle mirroring
-          turnOnMicrophoneWhenJoining: true,
-          turnOnCameraWhenJoining: true,
-          showMyCameraToggleButton: true,
-          showMyMicrophoneToggleButton: true,
-          showAudioVideoSettingsButton: true,
-          // Configure video settings
-          videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_720P,
-          // Note: Video mirroring is handled via CSS transform in the component
-          onJoinRoom: () => {
-            console.log('Successfully joined room:', roomID)
-            // Apply video mirroring fix after joining
-            setTimeout(() => {
-              const videos = document.querySelectorAll('.myCallContainer video')
-              videos.forEach(video => {
-                const videoElement = video as HTMLVideoElement
-                videoElement.style.transform = 'scaleX(-1)'
-              })
-            }, 1000)
-          },
-          onLeaveRoom: () => {
-            console.log('Left room:', roomID)
+        // Set a timeout for the join operation
+        const joinTimeout = setTimeout(() => {
+          console.error('Join room timeout after 30 seconds')
+          if (retryCount < maxRetries) {
+            console.log('Retrying due to timeout...')
+            initializeMeeting(element, retryCount + 1)
+          } else {
+            setError('Connection timeout. Please check your network and try again.')
           }
-        })
-      } catch (err) {
-        console.error('Error initializing meeting:', err)
-        setError('Failed to initialize meeting. Please try again.')
+        }, 30000) // 30 second timeout
+ zp.addPlugins({ZegoSuperBoardManager});
+        try {
+          // start the call
+          await zp.joinRoom({
+            container: element,
+            sharedLinks: [
+              {
+                name: 'Personal link',
+                url: window.location.href
+              }
+            ],
+            scenario: {
+              mode: ZegoUIKitPrebuilt.GroupCall, // To implement 1-on-1 calls, modify the parameter here to [ZegoUIKitPrebuilt.OneONoneCall].
+            },
+            preJoinViewConfig: {
+              title: 'Join Meeting',
+            },
+            // Add network quality monitoring
+            branding: {
+              logoURL: '',
+            },
+            // Note: Video mirroring is handled via CSS transform in the component
+            onJoinRoom: () => {
+              console.log('Successfully joined room:', roomID)
+              clearTimeout(joinTimeout) // Clear timeout on successful join
+              setError(null) // Clear any previous errors
+              // Apply video mirroring fix after joining
+              setTimeout(() => {
+                const videos = document.querySelectorAll('.myCallContainer video')
+                videos.forEach(video => {
+                  const videoElement = video as HTMLVideoElement
+                  videoElement.style.transform = 'scaleX(-1)'
+                })
+              }, 1000)
+            },
+            onLeaveRoom: () => {
+              console.log('Left room:', roomID)
+              clearTimeout(joinTimeout) // Clear timeout on leave
+            },
+            onUserJoin: (users: ZegoUser[]) => {
+              console.log('Users joined:', users)
+            },
+            onUserLeave: (users: ZegoUser[]) => {
+              console.log('Users left:', users)
+            }
+          })
+          
+          // Clear timeout on successful completion
+          clearTimeout(joinTimeout)
+        } catch (joinError) {
+          clearTimeout(joinTimeout)
+          throw joinError // Re-throw to be caught by outer try-catch
+        }
+      } catch (err: unknown) {
+        console.error(`Error initializing meeting (attempt ${retryCount + 1}):`, err)
+        
+        // Handle specific error codes
+        const error = err as { code?: number; message?: string }
+        
+        // Check if we should retry for specific errors
+        const shouldRetry = (error.code === 105 || error.code === 106 || error.code === 107) && retryCount < maxRetries
+        
+        if (shouldRetry) {
+          console.log(`Retrying in ${retryDelay}ms... (attempt ${retryCount + 2}/${maxRetries + 1})`)
+          setError(`Connection failed. Retrying... (${retryCount + 1}/${maxRetries})`)
+          
+          setTimeout(() => {
+            initializeMeeting(element, retryCount + 1)
+          }, retryDelay)
+          return
+        }
+        
+        // Final error handling if no retry or max retries reached
+        if (error.code === 105) {
+          setError('Session creation failed after multiple attempts. This usually happens due to network connectivity issues or browser restrictions. Try: 1) Refresh the page, 2) Check your internet connection, 3) Try a different browser, or 4) Disable browser extensions temporarily.')
+        } else if (error.code === 106) {
+          setError('Room connection failed after multiple attempts. Please check your internet connection and try again.')
+        } else if (error.code === 107) {
+          setError('Authentication failed. Please refresh the page and try again.')
+        } else {
+          setError(`Failed to initialize meeting: ${error.message || 'Unknown error'}. Please refresh the page and try again.`)
+        }
       }
     },
     [roomID, userData]

@@ -6,7 +6,6 @@ import { useSidebar } from "@/contexts/SidebarContext";
 import { 
   Users,  
   BarChart,
-  LogOut,
   FileText,
   CreditCard,
   Video,
@@ -155,37 +154,6 @@ export function Sidebar() {
           })}
         </div>
       </nav>
-      
-      {/* Logout Button */}
-      <div className="border-t border-slate-200/50 dark:border-gray-700/50 p-4 relative z-10">
-        <button className={`group relative flex w-full items-center rounded-2xl px-4 py-3 text-red-600 dark:text-red-400 transition-all duration-300 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-pink-500 hover:shadow-lg hover:scale-[1.02] font-semibold backdrop-blur-sm ${
-          isCollapsed ? 'justify-center' : 'gap-4'
-        }`}>
-          {/* Background gradient on hover */}
-          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-          
-          {/* Icon container */}
-          <div className="relative p-2 rounded-xl bg-red-50 dark:bg-red-900/20 shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110 group-hover:bg-white">
-            <LogOut className="h-5 w-5 transition-all duration-300 group-hover:text-red-500" />
-          </div>
-          
-          {/* Text */}
-          {!isCollapsed && (
-            <div className="relative">
-              <span className="text-sm tracking-wide">Logout</span>
-              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full transition-all duration-300 group-hover:w-full"></div>
-            </div>
-          )}
-          
-          {/* Tooltip for collapsed state */}
-          {isCollapsed && (
-            <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 whitespace-nowrap z-50 shadow-xl">
-              Logout
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45"></div>
-            </div>
-          )}
-        </button>
-      </div>
 
       <style jsx global>{`
         @keyframes fadeInUp {

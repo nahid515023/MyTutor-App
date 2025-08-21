@@ -3,8 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import { Bell, Menu, User, Settings, LogOut } from 'lucide-react'
 import Image from 'next/image'
+import Cookies from 'js-cookie'
 import { getUserData } from '@/utils/cookiesUserData'
 import { getProfileImageUrl } from '@/utils/getProfileImage'
+import { API_ENDPOINTS } from '@/config'
+import { api } from '@/_lib/api'
 
 interface AdminUser {
   id: string
@@ -48,11 +51,16 @@ export default function AdminHeader() {
     setShowProfileMenu(!showProfileMenu)
   }
 
-  const handleLogout = () => {
-    // Add logout functionality here
-    localStorage.removeItem('mytutor_auth_token')
-    localStorage.removeItem('mytutor_user_data')
-    window.location.href = '/auth/login'
+      const handleLogout = async (): Promise<void> => {
+    try {
+      await api.get(API_ENDPOINTS.AUTH.LOGOUT)
+      Cookies.remove('theme')
+
+
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Error during logout:', error)
+    }
   }
 
   return (
@@ -125,10 +133,10 @@ export default function AdminHeader() {
                   <p className="text-xs text-gray-500">{adminUser?.email || 'admin@mytutor.com'}</p>
                 </div>
                 
-                <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                {/* <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
                   <Settings className="h-4 w-4 mr-3 text-gray-500" />
                   Settings
-                </button>
+                </button> */}
                 
                 <button 
                   onClick={handleLogout}
